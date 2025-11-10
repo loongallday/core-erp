@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useRole } from '@/hooks/useRoles'
-import { usePermissions } from '@/hooks/usePermissions'
-import { useAuth } from '@/hooks/useAuth'
+import { useRole, usePermissions, useAuth } from '@core-erp/entity'
 import { supabase } from '@/lib/supabase'
 import { AppLayout } from '@/components/AppLayout'
 import { Button } from '@core-erp/ui/components/ui'
@@ -73,13 +71,13 @@ export default function RoleDetail() {
       // Insert new permissions
       if (selectedPermissions.length > 0) {
         const inserts = selectedPermissions.map(permission_id => ({
-          role_id: role.id,
+          role_id: role.id!,
           permission_id,
         }))
 
         const { error: insertError } = await supabase
           .from('role_permissions')
-          .insert(inserts)
+          .insert(inserts as any)
 
         if (insertError) throw insertError
       }

@@ -2,7 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from 'sonner'
+import { Toaster, toast } from 'sonner'
+import { SupabaseProvider, AuthProvider } from '@core-erp/entity'
+import { supabase } from './lib/supabase'
 import App from './App'
 import './index.css'
 import './i18n/config'
@@ -29,15 +31,19 @@ initializeTranslations().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <App />
-          <Toaster position="top-right" />
-        </BrowserRouter>
+        <SupabaseProvider client={supabase}>
+          <AuthProvider supabaseClient={supabase} toast={toast}>
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
+              <App />
+              <Toaster position="top-right" />
+            </BrowserRouter>
+          </AuthProvider>
+        </SupabaseProvider>
       </QueryClientProvider>
     </React.StrictMode>
   )

@@ -38,14 +38,31 @@ Customer C → core-erp instance → Customer C's Supabase Project
 - Node.js 18+ and npm
 - Supabase account and project
 
-### 1. Install Dependencies
+### 1. Configure Private Registry Access
+
+Set up access to the private npm registry:
+
+```bash
+# Login to private npm registry
+npm login --registry=https://your-private-registry.com
+
+# Or set in .npmrc
+echo "@core-erp:registry=https://your-private-registry.com" >> .npmrc
+echo "//your-private-registry.com/:_authToken=YOUR_TOKEN" >> .npmrc
+```
+
+### 2. Install Dependencies
 
 ```bash
 cd core-erp
 npm install
 ```
 
-### 2. Configure Environment
+The following private packages will be installed:
+- `@core-erp/entity` - Entity management & database utilities
+- `@core-erp/ui` - UI components & design system
+
+### 3. Configure Environment
 
 Create `.env` file:
 
@@ -54,7 +71,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-### 3. Start Development Server
+### 4. Start Development Server
 
 ```bash
 npm run dev
@@ -62,7 +79,7 @@ npm run dev
 
 Visit: **http://localhost:5175**
 
-### 4. Login
+### 5. Login
 
 Use magic link authentication - enter your email and check your inbox for the login link.
 
@@ -82,20 +99,16 @@ core-erp/
 │   │   ├── Roles/           # Role management
 │   │   └── Permissions/     # Permission management
 │   ├── contexts/
-│   │   └── AuthContext.tsx  # Auth state + permissions
+│   │   └── LocaleContext.tsx # Localization context
 │   ├── hooks/
-│   │   ├── useUsers.ts      # User CRUD operations
-│   │   ├── useRoles.ts      # Role CRUD operations
-│   │   └── usePermissions.ts # Permission queries
+│   │   ├── useLocale.ts     # Locale management
+│   │   └── useTranslations.ts # I18n hooks
 │   ├── lib/
-│   │   ├── supabase.ts      # Supabase client
-│   │   └── api.ts           # Edge Function helpers
-│   └── types/
-│       └── database.ts      # TypeScript types
-├── supabase/
-│   ├── functions/           # Edge Functions (Deno)
-│   │   └── get-user-permissions/
-│   └── migrations/          # SQL migrations
+│   │   ├── supabase.ts      # Configured Supabase client (uses @core-erp/entity)
+│   │   ├── plugin-system/   # 🔌 Plugin system
+│   │   └── i18n/            # Localization setup
+│   └── i18n/
+│       └── config.ts        # i18next configuration
 ├── docs/
 │   ├── plugins/             # 🔌 Plugin system documentation (6 guides)
 │   ├── guides/              # Core feature guides (4 guides)
@@ -104,6 +117,21 @@ core-erp/
 ├── PROJECT_CONTEXT.md       # 📚 COMPREHENSIVE ARCHITECTURE GUIDE
 ├── DOCUMENTATION.md         # 📚 COMPLETE DOCUMENTATION INDEX
 └── package.json
+
+Private Packages (Published to npm registry):
+
+@core-erp/entity            # 📦 Entity Package
+├── types/                  # Database TypeScript types
+├── lib/                    # Supabase utilities & permissions
+├── schemas/                # Zod validation schemas
+├── contexts/               # AuthContext + SupabaseContext
+├── hooks/                  # Entity hooks (useUsers, useRoles, etc.)
+└── supabase/
+    ├── functions/          # Edge Functions (Deno)
+    └── migrations/         # SQL migrations
+
+@core-erp/ui                # 🎨 UI Package
+└── components/             # 48 shadcn/ui components
 ```
 
 ## 🗄️ Database Schema
@@ -166,7 +194,8 @@ Custom roles can be created as needed.
 - **React 18** - UI library with TypeScript
 - **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - 48 accessible UI components
+- **@core-erp/ui** - 48 accessible shadcn/ui components (shared package)
+- **@core-erp/entity** - Entity management & Supabase utilities (shared package)
 - **React Router v6** - Client-side routing
 - **TanStack React Query** - Server state management
 - **React Hook Form + Zod** - Form handling and validation
@@ -176,6 +205,12 @@ Custom roles can be created as needed.
 - **Supabase Auth** - Magic link authentication
 - **Supabase Edge Functions** - Serverless business logic (Deno)
 - **Row Level Security (RLS)** - Database-level security
+
+### Private Packages (Published to npm)
+- **@core-erp/entity** - Database types, hooks, contexts, validation schemas, migrations, Edge Functions
+- **@core-erp/ui** - UI components and design system
+
+Both packages are published as **private npm packages** to a private registry.
 
 ### Current Project
 - **Project ID**: gtktmxrshikgehfdopaa
@@ -208,11 +243,21 @@ npm run build
 
 ### Deploy Edge Functions
 
+Edge Functions are included in the `@core-erp/entity` package:
+
 ```bash
+# Extract functions from node_modules
+cp -r node_modules/@core-erp/entity/supabase/functions ./supabase/functions
+
+# Deploy to Supabase
 supabase functions deploy get-user-permissions --project-ref <project-ref>
 supabase functions deploy create-user --project-ref <project-ref>
 supabase functions deploy update-user --project-ref <project-ref>
+supabase functions deploy assign-roles --project-ref <project-ref>
+supabase functions deploy update-user-locale --project-ref <project-ref>
 ```
+
+Or clone the `@core-erp/entity` repository and deploy from there.
 
 ### Hosting Options
 
@@ -253,12 +298,23 @@ npm run lint     # Run ESLint
 
 ### Adding New Features
 
-1. **Database**: Create migration in `supabase/migrations/`
-2. **Edge Function**: Create in `supabase/functions/` if needed
-3. **Types**: Update `src/types/database.ts`
-4. **Hooks**: Create React Query hooks in `src/hooks/`
-5. **UI**: Build pages using shadcn/ui components
-6. **Permissions**: Add permission checks with `hasPermission()`
+**If updating core entity logic** (requires publishing new version):
+
+1. Clone the `@core-erp/entity` package repository
+2. **Database**: Create migration in `supabase/migrations/`
+3. **Edge Function**: Create in `supabase/functions/` if needed
+4. **Types**: Update `src/types/database.ts`
+5. **Schemas**: Add Zod validation in `src/schemas/`
+6. **Hooks**: Create React Query hooks in `src/hooks/`
+7. Build and publish new version: `npm run build && npm publish`
+8. Update `core-erp` package.json to use new version
+
+**If adding app-specific features**:
+
+1. **UI**: Build pages using `@core-erp/ui` components
+2. **Permissions**: Add permission checks with `hasPermission()` from `@core-erp/entity`
+3. **Routes**: Add to `src/App.tsx` with `ProtectedRoute`
+4. **Menu**: Add navigation items to `src/components/AppLayout.tsx`
 
 ### Adding New Permissions
 

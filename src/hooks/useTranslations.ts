@@ -82,8 +82,8 @@ export function useCreateTranslation() {
 
   return useMutation({
     mutationFn: async (translation: Omit<Translation, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('translations')
+      const { data, error } = await (supabase
+        .from('translations') as any)
         .insert(translation)
         .select()
         .single()
@@ -114,8 +114,8 @@ export function useUpdateTranslation() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Translation> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('translations')
+      const { data, error } = await (supabase
+        .from('translations') as any)
         .update(updates)
         .eq('id', id)
         .select()
@@ -177,8 +177,8 @@ export function useBulkUpdateTranslations() {
   return useMutation({
     mutationFn: async (translations: Array<Partial<Translation> & { id: string }>) => {
       const promises = translations.map(({ id, ...updates }) =>
-        supabase
-          .from('translations')
+        (supabase
+          .from('translations') as any)
           .update(updates)
           .eq('id', id)
       )

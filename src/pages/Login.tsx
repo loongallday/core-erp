@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@core-erp/entity'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@core-erp/ui/components/ui'
 import { Input } from '@core-erp/ui/components/ui'

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
 import { LocaleProvider } from './contexts/LocaleContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { PluginProvider, usePluginRoutes } from './lib/plugin-system'
@@ -65,13 +64,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <LocaleProvider>
-        <PluginProvider config={pluginConfig} autoInitialize={true}>
-          <AppRoutes />
-        </PluginProvider>
-      </LocaleProvider>
-    </AuthProvider>
+    <LocaleProvider>
+      <PluginProvider config={pluginConfig} autoInitialize={true}>
+        <AppRoutes />
+      </PluginProvider>
+    </LocaleProvider>
   )
 }
 

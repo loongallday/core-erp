@@ -48,9 +48,13 @@ Each deployment is **completely isolated**:
 - **Components copied from**: ticket-calendar-pro (maintaining design consistency)
 
 **State Management**:
-- React Context (AuthContext for authentication state)
+- React Context (AuthContext from @core-erp/entity, LocaleContext for i18n)
 - TanStack React Query (server state, caching, automatic refetching)
 - React Hook Form + Zod (form state and validation)
+
+**Shared Packages**:
+- **@core-erp/entity** - Database types, Supabase utilities, Auth context, entity hooks, validation schemas
+- **@core-erp/ui** - 48 shadcn/ui components, design system, responsive utilities
 
 **Routing**: React Router v6
 - Protected routes with permission checking
@@ -335,9 +339,9 @@ User → user_roles → roles → role_permissions → permissions
 ### File Organization
 
 ```
-src/
+core-erp/src/
 ├── components/
-│   ├── ui/                    # 48 shadcn/ui components
+│   ├── ui/                    # 48 shadcn/ui components (from @core-erp/ui)
 │   │   ├── button.tsx
 │   │   ├── card.tsx
 │   │   ├── dialog.tsx
@@ -366,29 +370,67 @@ src/
 │   └── Permissions/
 │       └── PermissionManagement.tsx  # Assign permissions to roles
 ├── contexts/
-│   └── AuthContext.tsx        # Auth state + user permissions
+│   └── LocaleContext.tsx      # Localization & i18n state
 ├── hooks/
-│   ├── useAuth.ts             # Access auth context
-│   ├── useUsers.ts            # User CRUD operations
-│   ├── useRoles.ts            # Role CRUD operations
-│   ├── usePermissions.ts      # Permission queries
+│   ├── useLocale.ts           # Locale management
+│   ├── useTranslations.ts     # I18n hooks
 │   └── use-toast.ts           # Toast notifications
 ├── lib/
-│   ├── supabase.ts            # Supabase client setup
+│   ├── supabase.ts            # Configured Supabase client (uses @core-erp/entity)
+│   ├── plugin-system/         # 🔌 Plugin system implementation
 │   ├── utils.ts               # Utility functions (cn, etc.)
-│   └── api.ts                 # Edge Function call helpers
-├── types/
-│   ├── database.ts            # TypeScript types for DB tables
-│   └── index.ts               # Exported types
+│   └── i18n/                  # i18next configuration
+├── i18n/
+│   └── config.ts              # i18next setup
 ├── App.tsx                    # Route definitions
 ├── main.tsx                   # React root + providers
 └── index.css                  # Global styles + Tailwind
 ```
 
+### Core Entity Package Structure
+
+The `@core-erp/entity` package provides all entity-related functionality:
+
+```
+../core-entity/
+├── src/
+│   ├── types/
+│   │   ├── database.ts        # All database TypeScript types
+│   │   └── config.ts          # Configuration types (SupabaseConfig)
+│   ├── lib/
+│   │   ├── supabase.ts        # createSupabaseClient() factory
+│   │   ├── permissions.ts     # Permission checking utilities
+│   │   ├── constants.ts       # Auth & session constants
+│   │   └── authRetry.ts       # Retry logic with exponential backoff
+│   ├── schemas/
+│   │   ├── user.ts            # Zod validation for users
+│   │   ├── role.ts            # Zod validation for roles
+│   │   ├── permission.ts      # Zod validation for permissions
+│   │   ├── audit.ts           # Zod validation for audit logs
+│   │   └── index.ts
+│   ├── contexts/
+│   │   ├── AuthContext.tsx    # Auth state + permissions
+│   │   ├── SupabaseContext.tsx # Supabase client provider
+│   │   └── index.ts
+│   └── hooks/
+│       ├── useAuth.ts         # Access auth context
+│       ├── useUsers.ts        # User CRUD operations
+│       ├── useRoles.ts        # Role CRUD operations
+│       ├── usePermissions.ts  # Permission queries
+│       ├── useNetworkStatus.ts # Network monitoring
+│       ├── useSessionManagement.ts # Cross-tab sync
+│       └── index.ts
+├── supabase/
+│   ├── functions/             # Edge Functions (Deno)
+│   └── migrations/            # SQL migrations
+└── dist/                      # Built package
+```
+
 ### Key Components Explained
 
-#### AuthContext
-**File**: `src/contexts/AuthContext.tsx`
+#### AuthContext (from @core-erp/entity)
+**Package**: `@core-erp/entity`  
+**File**: `../core-entity/src/contexts/AuthContext.tsx`
 
 **Purpose**: Manage authentication state and user permissions globally
 
@@ -399,10 +441,28 @@ interface AuthContextType {
   user: User | null                 // User from users table
   loading: boolean                  // Initial auth loading
   permissions: string[]             // User's permission codes
+  isOnline: boolean                 // Network status
+  isReconnecting: boolean           // Reconnection state
+  sessionExpiresAt: Date | null     // Session expiry time
   hasPermission: (code: string) => boolean
   signInWithEmail: (email: string) => Promise<void>
+  signInWithPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
+  setIntendedDestination: (url: string) => void
+  getAndClearReturnUrl: () => string | null
+  isSessionExpiringSoon: (thresholdMs?: number) => boolean
 }
+```
+
+**Configuration**:
+```tsx
+import { AuthProvider } from '@core-erp/entity'
+import { supabase } from './lib/supabase'
+import { toast } from 'sonner'
+
+<AuthProvider supabaseClient={supabase} toast={toast}>
+  <App />
+</AuthProvider>
 ```
 
 **Initialization Flow**:
@@ -411,9 +471,12 @@ interface AuthContextType {
 3. Call `get-user-permissions` Edge Function
 4. Store permissions in context
 5. Provide `hasPermission()` helper for UI checks
+6. Monitor network status and session expiry
 
 **Usage Throughout App**:
 ```tsx
+import { useAuth } from '@core-erp/entity'
+
 const { hasPermission } = useAuth()
 
 {hasPermission('users:create') && (

@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@core-erp/entity'
 import { WifiOff } from 'lucide-react'
 import { Alert, AlertDescription } from '@core-erp/ui/components/ui'
 

@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, memo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@core-erp/entity'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@core-erp/ui/components/ui'
 import { ScrollArea } from '@core-erp/ui/components/ui'

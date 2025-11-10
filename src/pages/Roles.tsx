@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useRoles } from '@/hooks/useRoles'
+import { useRoles } from '@core-erp/entity'
 import { AppLayout } from '@/components/AppLayout'
 import { PageContainer } from '@core-erp/ui/components/responsive'
 import { PageHeader } from '@core-erp/ui/components/responsive'

@@ -15,6 +15,7 @@
     "generate-plugin": "cd tools/plugin-template-generator && npm install && npm start"
   },
   "dependencies": {
+    "@core-erp/entity": "file:../core-entity",
     "@core-erp/ui": "file:../core-ui",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",

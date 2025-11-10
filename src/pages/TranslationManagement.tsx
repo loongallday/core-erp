@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslations, useDeleteTranslation } from '@/hooks/useTranslations'
 import { AppLayout } from '@/components/AppLayout'
+import { PageContainer, PageHeader } from '@core-erp/ui/components/responsive'
 import { Card, CardContent } from '@core-erp/ui/components/ui'
 import { Button } from '@core-erp/ui/components/ui'
 import { Input } from '@core-erp/ui/components/ui'
@@ -30,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@core-erp/ui/components/ui'
-import { Plus, Search, Edit, Trash2, Languages } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Languages, X } from 'lucide-react'
 import { TranslationDialog } from './Translations/TranslationDialog'
 
 export default function TranslationManagement() {
@@ -56,131 +57,196 @@ export default function TranslationManagement() {
     }
   }
 
-  // Get unique locales and namespaces for filters
   const locales = ['en', 'th']
   const namespaces = ['common', 'auth', 'users', 'roles', 'errors']
+
+  const hasFilters = locale || namespace || search
 
   return (
     <AppLayout>
       <div>
-        <header className="border-b bg-card sticky top-0 z-10 shadow-sm">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                  <Languages className="h-8 w-8" />
-                  Translation Management
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Manage application translations for all languages
-                </p>
-              </div>
-              <Button onClick={() => setIsCreating(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Translation
-              </Button>
-            </div>
-          </div>
-        </header>
+        <PageHeader
+          title="Translation Management"
+          subtitle="Manage application translations for all languages"
+          actions={
+            <Button onClick={() => setIsCreating(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Translation
+            </Button>
+          }
+        />
 
-        <div className="container mx-auto px-4 py-6">
+        <PageContainer className="py-6 space-y-6">
           {/* Filters */}
-          <Card className="mb-6">
+          <Card>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search translations..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9"
-                  />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {/* Search */}
+                  <div className="relative sm:col-span-2 lg:col-span-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search translations..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  {/* Locale Filter */}
+                  <Select value={locale || 'all'} onValueChange={(val) => setLocale(val === 'all' ? '' : val)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Locales" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locales</SelectItem>
+                      {locales.map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc === 'en' ? '🇺🇸 English' : '🇹🇭 ไทย'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Namespace Filter */}
+                  <Select value={namespace || 'all'} onValueChange={(val) => setNamespace(val === 'all' ? '' : val)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Namespaces" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Namespaces</SelectItem>
+                      {namespaces.map((ns) => (
+                        <SelectItem key={ns} value={ns}>
+                          {ns}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Clear Filters */}
+                  {hasFilters && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setLocale('')
+                        setNamespace('')
+                        setSearch('')
+                      }}
+                      className="sm:col-span-2 lg:col-span-1"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear Filters
+                    </Button>
+                  )}
                 </div>
 
-                <Select value={locale} onValueChange={setLocale}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Locales" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locales</SelectItem>
-                    {locales.map((loc) => (
-                      <SelectItem key={loc} value={loc}>
-                        {loc === 'en' ? '🇺🇸 English' : '🇹🇭 ไทย'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={namespace} onValueChange={setNamespace}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Namespaces" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Namespaces</SelectItem>
-                    {namespaces.map((ns) => (
-                      <SelectItem key={ns} value={ns}>
-                        {ns}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {(locale || namespace || search) && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setLocale('')
-                      setNamespace('')
-                      setSearch('')
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-
-              <div className="mt-4 flex gap-2 text-sm text-muted-foreground">
-                <span>Total: {translations.length} translations</span>
+                {/* Results Count */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="font-medium">{translations.length}</span>
+                  <span>
+                    {translations.length === 1 ? 'translation' : 'translations'} found
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Translations Table */}
+          {/* Translations List */}
           <Card>
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="p-8 text-center">Loading translations...</div>
-              ) : translations.length === 0 ? (
-                <div className="p-12 text-center">
-                  <Languages className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4">
-                    {search || locale || namespace
-                      ? 'No translations match your filters'
-                      : 'No translations yet'}
-                  </p>
+            {isLoading ? (
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+                  <p className="text-sm text-muted-foreground">Loading translations...</p>
+                </div>
+              </CardContent>
+            ) : translations.length === 0 ? (
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center gap-4 text-center">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                    <Languages className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">
+                      {hasFilters ? 'No translations found' : 'No translations yet'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {hasFilters
+                        ? 'Try adjusting your filters'
+                        : 'Create your first translation to get started'}
+                    </p>
+                  </div>
                   <Button onClick={() => setIsCreating(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add First Translation
                   </Button>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
+              </CardContent>
+            ) : (
+              <>
+                {/* Mobile Card View */}
+                <div className="divide-y lg:hidden">
+                  {translations.map((translation) => (
+                    <div key={translation.id} className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline">
+                            {translation.locale === 'en' ? '🇺🇸 EN' : '🇹🇭 TH'}
+                          </Badge>
+                          <Badge variant="secondary">{translation.namespace}</Badge>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingId(translation.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setDeleteId(translation.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Key</div>
+                        <code className="text-xs bg-muted px-2 py-1 rounded break-all block">
+                          {translation.key}
+                        </code>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Value</div>
+                        <p className="text-sm break-words">{translation.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Locale</TableHead>
-                        <TableHead>Namespace</TableHead>
-                        <TableHead>Key</TableHead>
-                        <TableHead className="min-w-52">Value</TableHead>
-                        <TableHead className="w-24">Actions</TableHead>
+                        <TableHead className="w-28">Locale</TableHead>
+                        <TableHead className="w-36">Namespace</TableHead>
+                        <TableHead className="w-64">Key</TableHead>
+                        <TableHead>Value</TableHead>
+                        <TableHead className="w-28 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {translations.map((translation) => (
                         <TableRow key={translation.id}>
                           <TableCell>
-                            <Badge variant="outline">
+                            <Badge variant="outline" className="whitespace-nowrap">
                               {translation.locale === 'en' ? '🇺🇸 EN' : '🇹🇭 TH'}
                             </Badge>
                           </TableCell>
@@ -188,7 +254,7 @@ export default function TranslationManagement() {
                             <Badge variant="secondary">{translation.namespace}</Badge>
                           </TableCell>
                           <TableCell>
-                            <code className="text-xs bg-muted px-2 py-1 rounded">
+                            <code className="text-xs bg-muted px-2 py-1 rounded break-all">
                               {translation.key}
                             </code>
                           </TableCell>
@@ -197,21 +263,25 @@ export default function TranslationManagement() {
                               {translation.value}
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setEditingId(translation.id)}
+                                className="h-8 w-8 p-0"
                               >
                                 <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setDeleteId(translation.id)}
+                                className="h-8 w-8 p-0"
                               >
                                 <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
                               </Button>
                             </div>
                           </TableCell>
@@ -220,10 +290,10 @@ export default function TranslationManagement() {
                     </TableBody>
                   </Table>
                 </div>
-              )}
-            </CardContent>
+              </>
+            )}
           </Card>
-        </div>
+        </PageContainer>
       </div>
 
       {/* Create/Edit Dialog */}
@@ -256,4 +326,3 @@ export default function TranslationManagement() {
     </AppLayout>
   )
 }
-

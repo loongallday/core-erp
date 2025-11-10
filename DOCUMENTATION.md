@@ -12,6 +12,8 @@
 |----------|-------------|----------|
 | **README** | Project overview, setup, quick start | [`README.md`](./README.md) |
 | **Project Context** | Complete architecture and design (1260+ lines) | [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md) |
+| **Private Packages** | Setup and publish private npm packages | [`docs/PRIVATE_PACKAGE_SETUP.md`](./docs/PRIVATE_PACKAGE_SETUP.md) |
+| **Entity Package** | @core-erp/entity usage guide | [`docs/ENTITY_PACKAGE.md`](./docs/ENTITY_PACKAGE.md) |
 | **Plugin System** | Plugin development and management | [`docs/plugins/`](./docs/plugins/README.md) |
 | **Documentation Index** | All documentation organized by topic | [`docs/README.md`](./docs/README.md) |
 
@@ -51,6 +53,12 @@
 **Building Responsive UI**  
 → [`docs/guides/responsive-design.md`](./docs/guides/responsive-design.md)
 
+**Setting Up Private Packages**  
+→ [`docs/PRIVATE_PACKAGE_SETUP.md`](./docs/PRIVATE_PACKAGE_SETUP.md)
+
+**Using Entity Package**  
+→ [`docs/ENTITY_PACKAGE.md`](./docs/ENTITY_PACKAGE.md)
+
 ---
 
 ## 📚 Documentation Structure
@@ -73,6 +81,11 @@ core-erp/
 │       ├── PLUGIN_DEVELOPMENT_GUIDE.md       # Create plugins
 │       ├── I18N_ARCHITECTURE_EXPLAINED.md    # Translation system
 │       └── QUICK_REFERENCE.md                # Code snippets
+│
+├── 📦 Private Packages
+│   └── docs/
+│       ├── PRIVATE_PACKAGE_SETUP.md       # Publishing & consuming
+│       └── ENTITY_PACKAGE.md              # @core-erp/entity usage
 │
 ├── 📘 Guides & Tutorials
 │   └── docs/guides/

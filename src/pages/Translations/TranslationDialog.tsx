@@ -114,20 +114,20 @@ export function TranslationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Translation' : 'Add New Translation'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Update the translation value or key.'
+              ? 'Update the translation value.'
               : 'Create a new translation for a specific locale and namespace.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="locale">Locale *</Label>
               <Select
@@ -176,7 +176,7 @@ export function TranslationDialog({
             <Label htmlFor="key">
               Translation Key *
               <span className="text-xs text-muted-foreground ml-2">
-                (Use dot notation: e.g., actions.save)
+                (e.g., actions.save)
               </span>
             </Label>
             <Input
@@ -204,15 +204,15 @@ export function TranslationDialog({
           </div>
 
           {isEditing && (
-            <div className="bg-muted p-3 rounded text-sm">
+            <div className="bg-muted/50 p-3 rounded-md text-sm border">
               <p className="text-muted-foreground">
-                <strong>Note:</strong> Locale, namespace, and key cannot be changed when editing.
-                If you need to change these, please create a new translation.
+                <strong className="text-foreground">Note:</strong> Locale, namespace, and key cannot be changed when editing.
+                To change these, delete this translation and create a new one.
               </p>
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
@@ -232,4 +232,3 @@ export function TranslationDialog({
     </Dialog>
   )
 }
-

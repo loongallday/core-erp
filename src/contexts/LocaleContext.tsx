@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@core-erp/entity'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import {
@@ -77,8 +77,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
       // If user is logged in, save preference to database
       if (user) {
-        const { error } = await supabase
-          .from('users')
+        const { error } = await (supabase
+          .from('users') as any)
           .update({
             locale: newLocale,
             timezone: newTimezone || timezone,
