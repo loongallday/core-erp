@@ -14,13 +14,28 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@core-er
 import { SkeletonTable } from '@core-erp/ui/components/loading'
 import { Plus, Users as UsersIcon } from 'lucide-react'
 
-const UserTableRow = memo(({ user, onView, t }: { user: any; onView: (id: string) => void; t: any }) => (
+interface UserRole {
+  role: {
+    id: string
+    name: string
+  }
+}
+
+interface UserWithRoles {
+  id: string
+  name: string
+  email: string
+  is_active: boolean
+  roles?: UserRole[]
+}
+
+const UserTableRow = memo(({ user, onView, t }: { user: UserWithRoles; onView: (id: string) => void; t: (key: string) => string }) => (
   <TableRow>
     <TableCell className="font-medium sticky left-0 bg-card z-10">{user.name}</TableCell>
     <TableCell>{user.email}</TableCell>
     <TableCell>
       <div className="flex gap-1 flex-wrap">
-        {user.roles?.map((ur: any) => (
+        {user.roles?.map((ur) => (
           <Badge key={ur.role.id} variant="secondary">
             {ur.role.name}
           </Badge>
@@ -96,8 +111,8 @@ export default function Users() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user: any) => (
-                      <UserTableRow key={user.id} user={user} onView={handleViewUser} t={t} />
+                    {users.map((user) => (
+                      <UserTableRow key={user.id} user={user as UserWithRoles} onView={handleViewUser} t={t} />
                     ))}
                   </TableBody>
                 </ResponsiveTable>

@@ -32,12 +32,9 @@ export class SupabaseBackend implements BackendModule<object> {
     try {
       // Check cache first
       if (translationCache[cacheKey]) {
-        console.log(`[i18n] Using cached translations for ${cacheKey}`)
         callback(null, translationCache[cacheKey])
         return
       }
-
-      console.log(`[i18n] Fetching translations for ${language}:${namespace}`)
 
       // Fetch translations from Supabase
       const { data, error } = await supabase
@@ -53,7 +50,6 @@ export class SupabaseBackend implements BackendModule<object> {
       }
 
       if (!data || data.length === 0) {
-        console.warn(`[i18n] No translations found for ${cacheKey}`)
         callback(null, {}) // Return empty object, will show keys
         return
       }
@@ -64,7 +60,6 @@ export class SupabaseBackend implements BackendModule<object> {
       // Cache the translations
       translationCache[cacheKey] = translations
 
-      console.log(`[i18n] Loaded ${data.length} translations for ${cacheKey}`)
       callback(null, translations)
     } catch (error) {
       console.error(`[i18n] Unexpected error loading ${cacheKey}:`, error)
@@ -118,7 +113,6 @@ export function clearTranslationCache() {
   Object.keys(translationCache).forEach(key => {
     delete translationCache[key]
   })
-  console.log('[i18n] Translation cache cleared')
 }
 
 /**
@@ -129,8 +123,6 @@ export async function preloadTranslations(
   locales: string[],
   namespaces: string[]
 ): Promise<void> {
-  console.log('[i18n] Preloading translations...')
-  
   const promises: Promise<void>[] = []
 
   for (const locale of locales) {
@@ -149,6 +141,4 @@ export async function preloadTranslations(
   }
 
   await Promise.all(promises)
-  console.log('[i18n] Translation preloading complete')
 }
-

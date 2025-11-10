@@ -5,10 +5,33 @@
  * Handles config validation, merging, and runtime updates.
  */
 
+import { logDebug, logInfo, logError } from '../logger'
 import { PluginManifest, PluginConfiguration } from './types'
+import { deepMerge, getNestedValue, setNestedValue } from './utils'
 
 export class ConfigManager {
   private configCache: Map<string, any> = new Map()
+
+  /**
+   * Validate configuration against schema
+   */
+  private validateConfig(
+    pluginId: string,
+    config: any,
+    manifest: PluginManifest
+  ): any {
+    if (!manifest.config?.schema) {
+      return config
+    }
+
+    try {
+      return manifest.config.schema.parse(config)
+    } catch (error: any) {
+      throw new Error(
+        `Configuration validation failed for ${pluginId}: ${error.message}`
+      )
+    }
+  }
 
   /**
    * Load and merge plugin configuration
@@ -19,38 +42,22 @@ export class ConfigManager {
     coreConfig: PluginConfiguration
   ): Promise<any> {
     const pluginId = manifest.id
-
-    // Get plugin defaults
     const defaults = manifest.config?.defaults || {}
-
-    // Get core overrides
     const coreOverrides = coreConfig.config || {}
 
     // Deep merge (core takes precedence)
-    const mergedConfig = this.deepMerge(defaults, coreOverrides)
+    const mergedConfig = deepMerge(defaults, coreOverrides)
 
-    // Validate against schema if provided
-    if (manifest.config?.schema) {
-      try {
-        const validated = manifest.config.schema.parse(mergedConfig)
-        
-        // Cache the validated config
-        this.configCache.set(pluginId, validated)
+    // Validate and cache
+    const validated = this.validateConfig(pluginId, mergedConfig, manifest)
+    this.configCache.set(pluginId, validated)
 
-        console.log(`[ConfigManager] Loaded config for plugin: ${pluginId}`)
-        
-        return validated
-      } catch (error: any) {
-        throw new Error(
-          `Configuration validation failed for ${pluginId}: ${error.message}`
-        )
-      }
-    }
-
-    // No schema, just cache the merged config
-    this.configCache.set(pluginId, mergedConfig)
+    logInfo(`Loaded config for plugin: ${pluginId}`, { 
+      component: 'ConfigManager',
+      pluginId 
+    })
     
-    return mergedConfig
+    return validated
   }
 
   /**
@@ -66,9 +73,7 @@ export class ConfigManager {
    */
   getConfigValue(pluginId: string, path: string): any {
     const config = this.configCache.get(pluginId)
-    if (!config) return undefined
-
-    return this.getNestedValue(config, path)
+    return config ? getNestedValue(config, path) : undefined
   }
 
   /**
@@ -80,31 +85,23 @@ export class ConfigManager {
     manifest: PluginManifest
   ): Promise<any> {
     const currentConfig = this.configCache.get(pluginId) || {}
-    const updatedConfig = this.deepMerge(currentConfig, updates)
+    const updatedConfig = deepMerge(currentConfig, updates)
 
-    // Validate if schema exists
-    if (manifest.config?.schema) {
-      try {
-        const validated = manifest.config.schema.parse(updatedConfig)
-        this.configCache.set(pluginId, validated)
+    // Validate and cache
+    const validated = this.validateConfig(pluginId, updatedConfig, manifest)
+    this.configCache.set(pluginId, validated)
 
-        console.log(`[ConfigManager] Updated config for plugin: ${pluginId}`)
+    logInfo(`Updated config for plugin: ${pluginId}`, { 
+      component: 'ConfigManager',
+      pluginId 
+    })
 
-        // Trigger lifecycle hook if available
-        if (manifest.lifecycle?.onConfigChange) {
-          await manifest.lifecycle.onConfigChange(currentConfig, validated)
-        }
-
-        return validated
-      } catch (error: any) {
-        throw new Error(
-          `Configuration validation failed for ${pluginId}: ${error.message}`
-        )
-      }
+    // Trigger lifecycle hook if available
+    if (manifest.lifecycle?.onConfigChange) {
+      await manifest.lifecycle.onConfigChange(currentConfig, validated)
     }
 
-    this.configCache.set(pluginId, updatedConfig)
-    return updatedConfig
+    return validated
   }
 
   /**
@@ -116,8 +113,13 @@ export class ConfigManager {
       throw new Error(`No configuration found for plugin: ${pluginId}`)
     }
 
-    this.setNestedValue(config, path, value)
-    console.log(`[ConfigManager] Updated ${pluginId}.${path} = ${value}`)
+    setNestedValue(config, path, value)
+    logDebug(`Updated ${pluginId}.${path}`, { 
+      component: 'ConfigManager',
+      pluginId,
+      path,
+      value 
+    })
   }
 
   /**
@@ -160,10 +162,13 @@ export class ConfigManager {
   clearCache(pluginId?: string): void {
     if (pluginId) {
       this.configCache.delete(pluginId)
-      console.log(`[ConfigManager] Cleared cache for: ${pluginId}`)
+      logDebug(`Cleared cache for: ${pluginId}`, { 
+        component: 'ConfigManager',
+        pluginId 
+      })
     } else {
       this.configCache.clear()
-      console.log('[ConfigManager] Cleared all config cache')
+      logDebug('Cleared all config cache', { component: 'ConfigManager' })
     }
   }
 
@@ -171,64 +176,7 @@ export class ConfigManager {
    * Get all cached configurations
    */
   getAllConfigs(): Record<string, any> {
-    const configs: Record<string, any> = {}
-    for (const [pluginId, config] of this.configCache) {
-      configs[pluginId] = config
-    }
-    return configs
-  }
-
-  /**
-   * Deep merge two objects (source takes precedence)
-   */
-  private deepMerge(target: any, source: any): any {
-    if (!source) return target
-    if (!target) return source
-
-    const result = { ...target }
-
-    for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this.deepMerge(target[key] || {}, source[key])
-      } else {
-        result[key] = source[key]
-      }
-    }
-
-    return result
-  }
-
-  /**
-   * Get nested value from object by dot notation path
-   */
-  private getNestedValue(obj: any, path: string): any {
-    const keys = path.split('.')
-    let current = obj
-
-    for (const key of keys) {
-      if (current === null || current === undefined) return undefined
-      current = current[key]
-    }
-
-    return current
-  }
-
-  /**
-   * Set nested value in object by dot notation path
-   */
-  private setNestedValue(obj: any, path: string, value: any): void {
-    const keys = path.split('.')
-    let current = obj
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i]
-      if (!(key in current) || typeof current[key] !== 'object') {
-        current[key] = {}
-      }
-      current = current[key]
-    }
-
-    current[keys[keys.length - 1]] = value
+    return Object.fromEntries(this.configCache)
   }
 
   /**
@@ -254,15 +202,11 @@ export class ConfigManager {
     try {
       const config = JSON.parse(json)
       
-      // Validate if schema exists
-      if (manifest.config?.schema) {
-        const validated = manifest.config.schema.parse(config)
-        this.configCache.set(pluginId, validated)
-        return validated
-      }
-
-      this.configCache.set(pluginId, config)
-      return config
+      // Validate and cache
+      const validated = this.validateConfig(pluginId, config, manifest)
+      this.configCache.set(pluginId, validated)
+      
+      return validated
     } catch (error: any) {
       throw new Error(`Failed to import configuration: ${error.message}`)
     }

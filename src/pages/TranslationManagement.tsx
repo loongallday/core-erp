@@ -201,18 +201,20 @@ export default function TranslationManagement() {
                             variant="ghost"
                             onClick={() => setEditingId(translation.id)}
                             className="h-8 w-8 p-0"
+                            aria-label="Edit translation"
                           >
                             <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
+                            <span className="sr-only">Edit translation</span>
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => setDeleteId(translation.id)}
                             className="h-8 w-8 p-0"
+                            aria-label="Delete translation"
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
+                            <span className="sr-only">Delete translation</span>
                           </Button>
                         </div>
                       </div>
@@ -270,18 +272,20 @@ export default function TranslationManagement() {
                                 variant="ghost"
                                 onClick={() => setEditingId(translation.id)}
                                 className="h-8 w-8 p-0"
+                                aria-label="Edit translation"
                               >
                                 <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
+                                <span className="sr-only">Edit translation</span>
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setDeleteId(translation.id)}
                                 className="h-8 w-8 p-0"
+                                aria-label="Delete translation"
                               >
                                 <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
+                                <span className="sr-only">Delete translation</span>
                               </Button>
                             </div>
                           </TableCell>

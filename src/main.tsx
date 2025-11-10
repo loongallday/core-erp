@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster, toast } from 'sonner'
 import { SupabaseProvider, AuthProvider } from '@core-erp/entity'
 import { supabase } from './lib/supabase'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App'
 import './index.css'
 import './i18n/config'
@@ -26,26 +27,31 @@ const queryClient = new QueryClient({
   },
 })
 
-// Preload translations on app startup
-initializeTranslations().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <SupabaseProvider client={supabase}>
-          <AuthProvider supabaseClient={supabase} toast={toast}>
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
-              <App />
-              <Toaster position="top-right" />
-            </BrowserRouter>
-          </AuthProvider>
-        </SupabaseProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
-  )
-})
-
+// Preload translations on app startup (non-blocking)
+initializeTranslations()
+  .catch((error) => {
+    console.error('Critical error during translation initialization:', error)
+  })
+  .finally(() => {
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+      <React.StrictMode>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <SupabaseProvider client={supabase}>
+              <AuthProvider supabaseClient={supabase} toast={toast}>
+                <BrowserRouter
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                  }}
+                >
+                  <App />
+                  <Toaster position="top-right" />
+                </BrowserRouter>
+              </AuthProvider>
+            </SupabaseProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </React.StrictMode>
+    )
+  })

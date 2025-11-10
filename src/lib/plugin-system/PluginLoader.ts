@@ -5,6 +5,7 @@
  * Supports loading from npm packages, git repositories, and local files.
  */
 
+import { logDebug, logInfo, logError } from '../logger'
 import { PluginManifest } from './types'
 
 export class PluginLoader {
@@ -16,11 +17,17 @@ export class PluginLoader {
   async load(packageName: string): Promise<PluginManifest> {
     // Check cache first
     if (this.cache.has(packageName)) {
-      console.log(`[PluginLoader] Using cached plugin: ${packageName}`)
+      logDebug(`Using cached plugin: ${packageName}`, { 
+        component: 'PluginLoader',
+        packageName 
+      })
       return this.cache.get(packageName)!
     }
 
-    console.log(`[PluginLoader] Loading plugin: ${packageName}`)
+    logInfo(`Loading plugin: ${packageName}`, { 
+      component: 'PluginLoader',
+      packageName 
+    })
 
     try {
       // Dynamic import of the plugin package
@@ -35,11 +42,18 @@ export class PluginLoader {
       // Cache the manifest
       this.cache.set(packageName, manifest)
 
-      console.log(`[PluginLoader] Successfully loaded plugin: ${manifest.id}`)
+      logInfo(`Successfully loaded plugin: ${manifest.id}`, { 
+        component: 'PluginLoader',
+        packageName,
+        pluginId: manifest.id 
+      })
 
       return manifest
     } catch (error) {
-      console.error(`[PluginLoader] Failed to load plugin ${packageName}:`, error)
+      logError(`Failed to load plugin ${packageName}`, error as Error, { 
+        component: 'PluginLoader',
+        packageName 
+      })
       throw new Error(`Failed to load plugin ${packageName}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -114,12 +128,15 @@ export class PluginLoader {
    * Preload plugins (for better performance)
    */
   async preload(packageNames: string[]): Promise<void> {
-    console.log(`[PluginLoader] Preloading ${packageNames.length} plugins...`)
+    logInfo(`Preloading ${packageNames.length} plugins...`, { 
+      component: 'PluginLoader',
+      count: packageNames.length 
+    })
 
     const promises = packageNames.map((name) => this.load(name))
     await Promise.allSettled(promises)
 
-    console.log('[PluginLoader] Preload complete')
+    logInfo('Preload complete', { component: 'PluginLoader' })
   }
 
   /**
@@ -127,7 +144,7 @@ export class PluginLoader {
    */
   clearCache(): void {
     this.cache.clear()
-    console.log('[PluginLoader] Cache cleared')
+    logDebug('Cache cleared', { component: 'PluginLoader' })
   }
 
   /**

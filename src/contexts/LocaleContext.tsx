@@ -1,8 +1,9 @@
-import { createContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useState, useEffect, useMemo, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@core-erp/entity'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { logError } from '@/lib/logger'
 import {
   formatDate as formatDateUtil,
   formatDateTime as formatDateTimeUtil,
@@ -86,7 +87,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
           .eq('id', user.id)
 
         if (error) {
-          console.error('Error updating locale:', error)
+          logError('Error updating locale', new Error(error.message), { component: 'LocaleContext', userId: user.id })
           throw error
         }
 
@@ -97,7 +98,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         )
       }
     } catch (error) {
-      console.error('Error changing locale:', error)
+      logError('Error changing locale', error as Error, { component: 'LocaleContext', locale: newLocale })
       toast.error(
         newLocale === 'th'
           ? 'เปลี่ยนภาษาไม่สำเร็จ'
@@ -113,39 +114,31 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Formatting helper functions that use current locale
-  const formatDate = (date: Date | string, formatStr?: string) => 
-    formatDateUtil(date, locale, formatStr)
+  // Memoize formatting functions that use current locale
+  const formatters = useMemo(() => ({
+    formatDate: (date: Date | string, formatStr?: string) => 
+      formatDateUtil(date, locale, formatStr),
+    formatDateTime: (date: Date | string) => 
+      formatDateTimeUtil(date, locale),
+    formatNumber: (value: number, options?: Intl.NumberFormatOptions) => 
+      formatNumberUtil(value, locale, options),
+    formatCurrency: (amount: number, currency?: string) => 
+      formatCurrencyUtil(amount, locale, currency),
+    formatRelativeTime: (date: Date | string) => 
+      formatRelativeTimeUtil(date, locale),
+    formatPercentage: (value: number, decimals?: number) => 
+      formatPercentageUtil(value, locale, decimals),
+  }), [locale])
 
-  const formatDateTime = (date: Date | string) => 
-    formatDateTimeUtil(date, locale)
-
-  const formatNumber = (value: number, options?: Intl.NumberFormatOptions) => 
-    formatNumberUtil(value, locale, options)
-
-  const formatCurrency = (amount: number, currency?: string) => 
-    formatCurrencyUtil(amount, locale, currency)
-
-  const formatRelativeTime = (date: Date | string) => 
-    formatRelativeTimeUtil(date, locale)
-
-  const formatPercentage = (value: number, decimals?: number) => 
-    formatPercentageUtil(value, locale, decimals)
+  const contextValue = useMemo(() => ({
+    locale,
+    timezone,
+    changeLocale,
+    ...formatters,
+  }), [locale, timezone, changeLocale, formatters])
 
   return (
-    <LocaleContext.Provider
-      value={{
-        locale,
-        timezone,
-        changeLocale,
-        formatDate,
-        formatDateTime,
-        formatNumber,
-        formatCurrency,
-        formatRelativeTime,
-        formatPercentage,
-      }}
-    >
+    <LocaleContext.Provider value={contextValue}>
       {children}
     </LocaleContext.Provider>
   )

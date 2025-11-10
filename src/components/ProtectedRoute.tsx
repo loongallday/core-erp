@@ -32,7 +32,6 @@ export function ProtectedRoute({ children, requiredPermission }: ProtectedRouteP
   }, [session, loading, navigate, location, setIntendedDestination])
 
   if (loading) {
-
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

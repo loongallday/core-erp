@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { SupabaseBackend } from '@/lib/supabaseI18nBackend'
+import { logWarn, logDebug } from '@/lib/logger'
 
 // Initialize i18next with Supabase backend
 i18n
@@ -35,8 +36,8 @@ i18n
 
     // Show translation keys when translation is missing
     saveMissing: false,
-    missingKeyHandler: (lngs, ns, key, _fallbackValue) => {
-      console.warn(`[i18n] Missing translation: ${ns}:${key}`)
+    missingKeyHandler: (_lngs, ns, key, _fallbackValue) => {
+      logWarn(`Missing translation: ${ns}:${key}`, { component: 'i18n', namespace: ns, key })
     },
     
     // Return key if translation is missing
@@ -44,7 +45,7 @@ i18n
     returnEmptyString: false,
     parseMissingKeyHandler: (key) => {
       // Return the key itself when translation is missing
-      console.log(`[i18n] Showing key for missing translation: ${key}`)
+      logDebug(`Showing key for missing translation: ${key}`, { component: 'i18n', key })
       return key
     },
   })

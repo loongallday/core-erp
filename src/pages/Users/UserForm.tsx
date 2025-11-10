@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useCreateUser, useUpdateUser, useUser, useRoles, useAuth } from '@core-erp/entity'
 import { AppLayout } from '@/components/AppLayout'
+import { PageContainer, PageHeader } from '@core-erp/ui/components/responsive'
 import { Button } from '@core-erp/ui/components/ui'
 import { Input } from '@core-erp/ui/components/ui'
 import { Label } from '@core-erp/ui/components/ui'
@@ -53,7 +54,7 @@ export default function UserForm() {
         name: user.name,
         email: user.email,
         phone: user.phone || '',
-        role_ids: user.roles?.map((ur: any) => ur.role.id) || [],
+        role_ids: user.roles?.map((ur: { role: { id: string } }) => ur.role.id) || [],
         is_active: user.is_active,
       })
     }
@@ -72,8 +73,9 @@ export default function UserForm() {
         toast.success('User created successfully')
       }
       navigate('/users')
-    } catch (error: any) {
-      toast.error(error.message || 'An error occurred')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(message)
     }
   }
 
@@ -101,23 +103,18 @@ export default function UserForm() {
   return (
     <AppLayout>
       <div>
-        <header className="border-b bg-card sticky top-0 z-10 shadow-sm">
-          <div className="container mx-auto px-4 py-3 md:py-4">
-            <div className="flex items-center gap-3 md:gap-4">
-              <Button variant="ghost" size="icon" className="touch-target" onClick={() => navigate('/users')}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold truncate">{isEditing ? 'Edit User' : 'Create User'}</h1>
-                <p className="text-sm text-muted-foreground truncate">
-                  {isEditing ? 'Update user information' : 'Add a new user to the system'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
+        <PageHeader
+          title={isEditing ? 'Edit User' : 'Create User'}
+          subtitle={isEditing ? 'Update user information' : 'Add a new user to the system'}
+          actions={
+            <Button variant="ghost" onClick={() => navigate('/users')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Users
+            </Button>
+          }
+        />
 
-        <div className="container mx-auto px-4 py-6">
+        <PageContainer className="py-6">
           <Card className="max-w-full md:max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle>User Information</CardTitle>
@@ -248,7 +245,7 @@ export default function UserForm() {
               </form>
             </CardContent>
           </Card>
-        </div>
+        </PageContainer>
       </div>
     </AppLayout>
   )

@@ -5,6 +5,8 @@
  * Plugins can emit events and listen to events from other plugins or core.
  */
 
+import { logDebug, logError } from '../logger'
+
 export class EventBus {
   private listeners: Map<string, Set<Function>> = new Map()
   private eventHistory: Array<{ event: string; data: any; timestamp: Date }> = []
@@ -14,7 +16,10 @@ export class EventBus {
    * Emit an event
    */
   emit(eventName: string, data: any): void {
-    console.log(`[EventBus] Emitting event: ${eventName}`)
+    logDebug(`Emitting event: ${eventName}`, { 
+      component: 'EventBus',
+      eventName 
+    })
 
     // Store in history
     this.eventHistory.push({
@@ -32,7 +37,10 @@ export class EventBus {
     const eventListeners = this.listeners.get(eventName)
     
     if (!eventListeners || eventListeners.size === 0) {
-      console.log(`[EventBus] No listeners for event: ${eventName}`)
+      logDebug(`No listeners for event: ${eventName}`, { 
+        component: 'EventBus',
+        eventName 
+      })
       return
     }
 
@@ -46,13 +54,21 @@ export class EventBus {
         successCount++
       } catch (error) {
         errorCount++
-        console.error(`[EventBus] Error in event handler for ${eventName}:`, error)
+        logError(`Error in event handler for ${eventName}`, error as Error, { 
+          component: 'EventBus',
+          eventName 
+        })
       }
     }
 
-    console.log(
-      `[EventBus] Event ${eventName} delivered to ${successCount} listeners ` +
-      `(${errorCount} errors)`
+    logDebug(
+      `Event ${eventName} delivered to ${successCount} listeners`,
+      { 
+        component: 'EventBus',
+        eventName,
+        successCount,
+        errorCount 
+      }
     )
   }
 
@@ -65,7 +81,10 @@ export class EventBus {
     }
 
     this.listeners.get(eventName)!.add(handler)
-    console.log(`[EventBus] Registered listener for: ${eventName}`)
+    logDebug(`Registered listener for: ${eventName}`, { 
+      component: 'EventBus',
+      eventName 
+    })
 
     // Return unsubscribe function
     return () => this.off(eventName, handler)
@@ -101,7 +120,10 @@ export class EventBus {
     }
 
     if (removed) {
-      console.log(`[EventBus] Removed listener for: ${eventName}`)
+      logDebug(`Removed listener for: ${eventName}`, { 
+        component: 'EventBus',
+        eventName 
+      })
     }
 
     return removed
@@ -113,10 +135,13 @@ export class EventBus {
   removeAllListeners(eventName?: string): void {
     if (eventName) {
       this.listeners.delete(eventName)
-      console.log(`[EventBus] Removed all listeners for: ${eventName}`)
+      logDebug(`Removed all listeners for: ${eventName}`, { 
+        component: 'EventBus',
+        eventName 
+      })
     } else {
       this.listeners.clear()
-      console.log('[EventBus] Removed all listeners')
+      logDebug('Removed all listeners', { component: 'EventBus' })
     }
   }
 
@@ -166,7 +191,7 @@ export class EventBus {
    */
   clearHistory(): void {
     this.eventHistory = []
-    console.log('[EventBus] Event history cleared')
+    logDebug('Event history cleared', { component: 'EventBus' })
   }
 
   /**
@@ -213,12 +238,18 @@ export class EventBus {
    * Emit event and wait for all listeners to complete
    */
   async emitAsync(eventName: string, data: any): Promise<any[]> {
-    console.log(`[EventBus] Emitting async event: ${eventName}`)
+    logDebug(`Emitting async event: ${eventName}`, { 
+      component: 'EventBus',
+      eventName 
+    })
 
     const eventListeners = this.listeners.get(eventName)
     
     if (!eventListeners || eventListeners.size === 0) {
-      console.log(`[EventBus] No listeners for event: ${eventName}`)
+      logDebug(`No listeners for event: ${eventName}`, { 
+        component: 'EventBus',
+        eventName 
+      })
       return []
     }
 
@@ -227,7 +258,10 @@ export class EventBus {
       try {
         return await handler(data)
       } catch (error) {
-        console.error(`[EventBus] Error in async event handler for ${eventName}:`, error)
+        logError(`Error in async event handler for ${eventName}`, error as Error, { 
+          component: 'EventBus',
+          eventName 
+        })
         throw error
       }
     })

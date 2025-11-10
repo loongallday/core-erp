@@ -229,6 +229,10 @@ Both packages are published as **private npm packages** to a private registry.
 
 ## 🚢 Deployment
 
+### Quick Start
+
+For complete production deployment instructions, see **[Production Deployment Guide](./docs/PRODUCTION_DEPLOYMENT.md)**.
+
 ### Build for Production
 
 ```bash
@@ -272,6 +276,7 @@ Or clone the `@core-erp/entity` repository and deploy from there.
 
 - **[DOCUMENTATION.md](./DOCUMENTATION.md)** - 📖 **Master documentation index**
 - **[PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)** - 📖 **Complete architecture** (1300+ lines)
+- **[PRODUCTION_DEPLOYMENT.md](./docs/PRODUCTION_DEPLOYMENT.md)** - 🚀 **Production deployment guide**
 - **[docs/plugins/](./docs/plugins/)** - 🔌 Plugin system documentation (6 guides)
 - **[docs/guides/](./docs/guides/)** - Core feature guides (4 guides)  
 - **[docs/testing/](./docs/testing/)** - Testing documentation

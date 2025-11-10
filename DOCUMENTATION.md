@@ -12,6 +12,9 @@
 |----------|-------------|----------|
 | **README** | Project overview, setup, quick start | [`README.md`](./README.md) |
 | **Project Context** | Complete architecture and design (1260+ lines) | [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md) |
+| **Audit Report** | Comprehensive codebase audit (NEW) | [`AUDIT_REPORT.md`](./AUDIT_REPORT.md) |
+| **Audit Implementation** | Implementation status (NEW) | [`AUDIT_IMPLEMENTATION_STATUS.md`](./AUDIT_IMPLEMENTATION_STATUS.md) |
+| **Production Deployment** | Production deployment guide (NEW) | [`docs/PRODUCTION_DEPLOYMENT.md`](./docs/PRODUCTION_DEPLOYMENT.md) |
 | **Private Packages** | Setup and publish private npm packages | [`docs/PRIVATE_PACKAGE_SETUP.md`](./docs/PRIVATE_PACKAGE_SETUP.md) |
 | **Entity Package** | @core-erp/entity usage guide | [`docs/ENTITY_PACKAGE.md`](./docs/ENTITY_PACKAGE.md) |
 | **Plugin System** | Plugin development and management | [`docs/plugins/`](./docs/plugins/README.md) |

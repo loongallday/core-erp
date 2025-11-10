@@ -21,6 +21,31 @@ export interface TranslationFilters {
 }
 
 /**
+ * Shared success handler for translation mutations
+ */
+function handleTranslationMutationSuccess(
+  queryClient: ReturnType<typeof useQueryClient>,
+  successMessage: string,
+  data?: { locale?: string; namespace?: string }
+) {
+  queryClient.invalidateQueries({ queryKey: ['translations'] })
+  clearTranslationCache()
+  
+  if (data?.locale && data?.namespace) {
+    i18n.reloadResources(data.locale, data.namespace)
+  }
+  
+  toast.success(successMessage)
+}
+
+/**
+ * Shared error handler for translation mutations
+ */
+function handleTranslationMutationError(error: any, fallbackMessage: string) {
+  toast.error(error.message || fallbackMessage)
+}
+
+/**
  * Fetch all translations with optional filters
  */
 export function useTranslations(filters?: TranslationFilters) {
@@ -92,16 +117,14 @@ export function useCreateTranslation() {
       return data
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['translations'] })
-      
-      // Clear i18n cache and reload
-      clearTranslationCache()
-      i18n.reloadResources(data.locale, data.namespace)
-      
-      toast.success('Translation created successfully')
+      handleTranslationMutationSuccess(
+        queryClient, 
+        'Translation created successfully',
+        data
+      )
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to create translation')
+      handleTranslationMutationError(error, 'Failed to create translation')
     },
   })
 }
@@ -125,16 +148,14 @@ export function useUpdateTranslation() {
       return data
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['translations'] })
-      
-      // Clear i18n cache and reload
-      clearTranslationCache()
-      i18n.reloadResources(data.locale, data.namespace)
-      
-      toast.success('Translation updated successfully')
+      handleTranslationMutationSuccess(
+        queryClient,
+        'Translation updated successfully',
+        data
+      )
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to update translation')
+      handleTranslationMutationError(error, 'Failed to update translation')
     },
   })
 }
@@ -155,15 +176,13 @@ export function useDeleteTranslation() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['translations'] })
-      
-      // Clear i18n cache
-      clearTranslationCache()
-      
-      toast.success('Translation deleted successfully')
+      handleTranslationMutationSuccess(
+        queryClient,
+        'Translation deleted successfully'
+      )
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete translation')
+      handleTranslationMutationError(error, 'Failed to delete translation')
     },
   })
 }
@@ -191,12 +210,13 @@ export function useBulkUpdateTranslations() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['translations'] })
-      clearTranslationCache()
-      toast.success('Translations updated successfully')
+      handleTranslationMutationSuccess(
+        queryClient,
+        'Translations updated successfully'
+      )
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to update translations')
+      handleTranslationMutationError(error, 'Failed to update translations')
     },
   })
 }

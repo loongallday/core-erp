@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@core-erp/ui/components/ui'
 import { ScrollArea } from '@core-erp/ui/components/ui'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@core-erp/ui/components/ui'
-import { LayoutDashboard, Users, Shield, Key, Languages, LogOut, Menu } from 'lucide-react'
+import { LayoutDashboard, Users, Shield, Package, Languages, LogOut, Menu } from 'lucide-react'
 import { LocaleSelector } from '@/components/LocaleSelector'
 import { usePluginMenuItems } from '@/lib/plugin-system'
 import { cn } from '@core-erp/ui/lib'
@@ -26,7 +26,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { path: '/dashboard', label: t('navigation.dashboard'), icon: LayoutDashboard, permission: null, order: 0 },
     { path: '/users', label: t('navigation.users'), icon: Users, permission: 'users:view', order: 10 },
     { path: '/roles', label: t('navigation.roles'), icon: Shield, permission: 'roles:view', order: 20 },
-    { path: '/permissions', label: t('navigation.permissions'), icon: Key, permission: 'permissions:view', order: 30 },
+    { path: '/plugins', label: 'Plugins', icon: Package, permission: 'system:configure', order: 30 },
     { path: '/translations', label: 'Translations', icon: Languages, permission: 'system:configure', order: 40 },
   ], [t])
 
@@ -35,7 +35,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const pluginItems = pluginMenuItems.map(item => ({
       ...item,
       // Get Lucide icon by name
-      icon: item.icon ? ((LucideIcons as Record<string, typeof LayoutDashboard>)[item.icon] || LayoutDashboard) : LayoutDashboard,
+      icon: item.icon ? ((LucideIcons as any)[item.icon] || LayoutDashboard) : LayoutDashboard,
     }))
 
     return [...coreMenuItems, ...pluginItems]
@@ -100,9 +100,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             size="icon"
             className="touch-target"
             onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open navigation menu"
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Open navigation menu</span>
           </Button>
         </div>
       </div>

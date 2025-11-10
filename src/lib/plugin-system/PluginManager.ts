@@ -5,6 +5,7 @@
  * Manages plugin lifecycle, configuration, and integration with core system.
  */
 
+import { logDebug, logInfo, logWarn, logError } from '../logger'
 import {
   PluginsConfiguration,
   PluginConfiguration,
@@ -23,6 +24,7 @@ import { ConfigManager } from './ConfigManager'
 import { LocalizationManager } from './LocalizationManager'
 import { EventBus } from './EventBus'
 import { HookRegistry } from './HookRegistry'
+import { extractPluginId } from './utils'
 
 export class PluginManager {
   private registry: PluginRegistry
@@ -45,7 +47,7 @@ export class PluginManager {
     this.eventBus = new EventBus()
     this.hookRegistry = new HookRegistry()
 
-    console.log('[PluginManager] Plugin system initialized')
+    logInfo('Plugin system initialized', { component: 'PluginManager' })
   }
 
   /**
@@ -57,13 +59,13 @@ export class PluginManager {
       return
     }
 
-    console.log('[PluginManager] Starting initialization...')
+    logInfo('Starting initialization...', { component: 'PluginManager' })
     this.configuration = config
 
     try {
       // 1. Load plugins from configuration
       const enabledPlugins = config.plugins.filter(p => p.enabled)
-      console.log(`[PluginManager] Loading ${enabledPlugins.length} enabled plugins...`)
+      logInfo(`Loading ${enabledPlugins.length} enabled plugins...`, { component: 'PluginManager', count: enabledPlugins.length })
 
       for (const pluginConfig of enabledPlugins) {
         await this.loadPlugin(pluginConfig)
@@ -73,7 +75,7 @@ export class PluginManager {
       const loadOrder = this.dependencyResolver.resolve(
         new Map(Array.from(this.registry.getAll().map(p => [p.id, p])))
       )
-      console.log(`[PluginManager] Load order: ${loadOrder.join(' → ')}`)
+      logDebug(`Load order: ${loadOrder.join(' → ')}`, { component: 'PluginManager', loadOrder })
 
       // 3. Enable plugins in correct order
       for (const pluginId of loadOrder) {
@@ -81,7 +83,11 @@ export class PluginManager {
       }
 
       this.initialized = true
-      console.log('[PluginManager] Initialization complete')
+      logInfo('Initialization complete', { 
+        component: 'PluginManager',
+        pluginCount: this.registry.getAll().length,
+        enabledCount: this.registry.getEnabled().length
+      })
 
       // Emit initialization complete event
       this.eventBus.emit('plugin-system:initialized', {
@@ -89,7 +95,7 @@ export class PluginManager {
         enabledCount: this.registry.getEnabled().length,
       })
     } catch (error) {
-      console.error('[PluginManager] Initialization failed:', error)
+      logError('Initialization failed', error as Error, { component: 'PluginManager' })
       throw error
     }
   }
@@ -99,7 +105,7 @@ export class PluginManager {
    */
   private async loadPlugin(config: PluginConfiguration): Promise<void> {
     try {
-      console.log(`[PluginManager] Loading plugin: ${config.package}`)
+      logInfo(`Loading plugin: ${config.package}`, { component: 'PluginManager', package: config.package })
 
       // Create plugin context
       const context = this.createPluginContext(config.package)
@@ -113,9 +119,9 @@ export class PluginManager {
       // Load plugin translations
       await this.localizationManager.loadPluginTranslations(loadedPlugin.manifest, config)
 
-      console.log(`[PluginManager] Plugin loaded: ${loadedPlugin.id}`)
+      logInfo(`Plugin loaded: ${loadedPlugin.id}`, { component: 'PluginManager', pluginId: loadedPlugin.id })
     } catch (error) {
-      console.error(`[PluginManager] Failed to load plugin ${config.package}:`, error)
+      logError(`Failed to load plugin ${config.package}`, error as Error, { component: 'PluginManager', package: config.package })
       throw error
     }
   }
@@ -130,7 +136,7 @@ export class PluginManager {
     }
 
     try {
-      console.log(`[PluginManager] Enabling plugin: ${pluginId}`)
+      logInfo(`Enabling plugin: ${pluginId}`, { component: 'PluginManager', pluginId })
 
       // Update status
       this.registry.updateStatus(pluginId, 'loading')
@@ -156,12 +162,12 @@ export class PluginManager {
         await plugin.manifest.lifecycle.afterStart(plugin.context)
       }
 
-      console.log(`[PluginManager] Plugin enabled: ${pluginId}`)
+      logInfo(`Plugin enabled: ${pluginId}`, { component: 'PluginManager', pluginId })
 
       // Emit event
       this.eventBus.emit('plugin:enabled', pluginId)
     } catch (error) {
-      console.error(`[PluginManager] Failed to enable plugin ${pluginId}:`, error)
+      logError(`Failed to enable plugin ${pluginId}`, error as Error, { component: 'PluginManager', pluginId })
       this.registry.updateStatus(pluginId, 'error')
       throw error
     }
@@ -178,9 +184,9 @@ export class PluginManager {
       try {
         const routesModule = await manifest.frontend.routes()
         plugin.routes = routesModule.default
-        console.log(`[PluginManager] Loaded ${plugin.routes.length} routes for ${plugin.id}`)
+        logDebug(`Loaded ${plugin.routes.length} routes for ${plugin.id}`, { component: 'PluginManager', pluginId: plugin.id, count: plugin.routes.length })
       } catch (error) {
-        console.error(`[PluginManager] Failed to load routes for ${plugin.id}:`, error)
+        logError(`Failed to load routes for ${plugin.id}`, error as Error, { component: 'PluginManager', pluginId: plugin.id })
       }
     }
 
@@ -189,9 +195,9 @@ export class PluginManager {
       try {
         const menuModule = await manifest.frontend.menu()
         plugin.menuItems = menuModule.default
-        console.log(`[PluginManager] Loaded ${plugin.menuItems.length} menu items for ${plugin.id}`)
+        logDebug(`Loaded ${plugin.menuItems.length} menu items for ${plugin.id}`, { component: 'PluginManager', pluginId: plugin.id, count: plugin.menuItems.length })
       } catch (error) {
-        console.error(`[PluginManager] Failed to load menu for ${plugin.id}:`, error)
+        logError(`Failed to load menu for ${plugin.id}`, error as Error, { component: 'PluginManager', pluginId: plugin.id })
       }
     }
 
@@ -200,9 +206,9 @@ export class PluginManager {
       try {
         const widgetsModule = await manifest.frontend.widgets()
         plugin.widgets = widgetsModule.default
-        console.log(`[PluginManager] Loaded ${plugin.widgets.length} widgets for ${plugin.id}`)
+        logDebug(`Loaded ${plugin.widgets.length} widgets for ${plugin.id}`, { component: 'PluginManager', pluginId: plugin.id, count: plugin.widgets.length })
       } catch (error) {
-        console.error(`[PluginManager] Failed to load widgets for ${plugin.id}:`, error)
+        logError(`Failed to load widgets for ${plugin.id}`, error as Error, { component: 'PluginManager', pluginId: plugin.id })
       }
     }
 
@@ -211,9 +217,9 @@ export class PluginManager {
       try {
         const permissionsModule = await manifest.permissions()
         plugin.permissions = permissionsModule.default
-        console.log(`[PluginManager] Loaded ${plugin.permissions.length} permissions for ${plugin.id}`)
+        logDebug(`Loaded ${plugin.permissions.length} permissions for ${plugin.id}`, { component: 'PluginManager', pluginId: plugin.id, count: plugin.permissions.length })
       } catch (error) {
-        console.error(`[PluginManager] Failed to load permissions for ${plugin.id}:`, error)
+        logError(`Failed to load permissions for ${plugin.id}`, error as Error, { component: 'PluginManager', pluginId: plugin.id })
       }
     }
 
@@ -223,9 +229,9 @@ export class PluginManager {
         try {
           const handlerModule = await handlerLoader()
           this.eventBus.on(eventName, handlerModule.default)
-          console.log(`[PluginManager] Registered event listener for ${eventName}`)
+          logDebug(`Registered event listener for ${eventName}`, { component: 'PluginManager', eventName })
         } catch (error) {
-          console.error(`[PluginManager] Failed to register event listener for ${eventName}:`, error)
+          logError(`Failed to register event listener for ${eventName}`, error as Error, { component: 'PluginManager', eventName })
         }
       }
     }
@@ -241,7 +247,7 @@ export class PluginManager {
     }
 
     try {
-      console.log(`[PluginManager] Disabling plugin: ${pluginId}`)
+      logInfo(`Disabling plugin: ${pluginId}`, { component: 'PluginManager', pluginId })
 
       // Call onDisable lifecycle hook
       if (plugin.manifest.lifecycle?.onDisable) {
@@ -252,75 +258,64 @@ export class PluginManager {
       this.registry.updateStatus(pluginId, 'disabled')
       plugin.enabled = false
 
-      console.log(`[PluginManager] Plugin disabled: ${pluginId}`)
+      logInfo(`Plugin disabled: ${pluginId}`, { component: 'PluginManager', pluginId })
 
       // Emit event
       this.eventBus.emit('plugin:disabled', pluginId)
     } catch (error) {
-      console.error(`[PluginManager] Failed to disable plugin ${pluginId}:`, error)
+      logError(`Failed to disable plugin ${pluginId}`, error as Error, { component: 'PluginManager', pluginId })
       throw error
     }
+  }
+
+  /**
+   * Generic method to collect items from enabled plugins
+   */
+  private collectFromPlugins<T>(
+    propertyName: keyof LoadedPlugin,
+    sortFn?: (a: T, b: T) => number
+  ): T[] {
+    const items: T[] = []
+    
+    for (const plugin of this.registry.getEnabled()) {
+      const pluginItems = plugin[propertyName] as T[] | undefined
+      if (pluginItems) {
+        items.push(...pluginItems)
+      }
+    }
+
+    return sortFn ? items.sort(sortFn) : items
   }
 
   /**
    * Get all plugin routes
    */
   getRoutes(): PluginRoute[] {
-    const routes: PluginRoute[] = []
-    
-    for (const plugin of this.registry.getEnabled()) {
-      if (plugin.routes) {
-        routes.push(...plugin.routes)
-      }
-    }
-
-    return routes
+    return this.collectFromPlugins<PluginRoute>('routes')
   }
 
   /**
-   * Get all plugin menu items
+   * Get all plugin menu items (sorted by order)
    */
   getMenuItems(): PluginMenuItem[] {
-    const menuItems: PluginMenuItem[] = []
-    
-    for (const plugin of this.registry.getEnabled()) {
-      if (plugin.menuItems) {
-        menuItems.push(...plugin.menuItems)
-      }
-    }
-
-    // Sort by order
-    return menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
+    return this.collectFromPlugins<PluginMenuItem>(
+      'menuItems',
+      (a, b) => (a.order || 0) - (b.order || 0)
+    )
   }
 
   /**
    * Get all plugin widgets
    */
   getWidgets(): PluginWidget[] {
-    const widgets: PluginWidget[] = []
-    
-    for (const plugin of this.registry.getEnabled()) {
-      if (plugin.widgets) {
-        widgets.push(...plugin.widgets)
-      }
-    }
-
-    return widgets
+    return this.collectFromPlugins<PluginWidget>('widgets')
   }
 
   /**
    * Get all plugin permissions
    */
   getPermissions(): PluginPermission[] {
-    const permissions: PluginPermission[] = []
-    
-    for (const plugin of this.registry.getEnabled()) {
-      if (plugin.permissions) {
-        permissions.push(...plugin.permissions)
-      }
-    }
-
-    return permissions
+    return this.collectFromPlugins<PluginPermission>('permissions')
   }
 
   /**
@@ -385,6 +380,34 @@ export class PluginManager {
   }
 
   /**
+   * Get all loaded plugins
+   */
+  getAllPlugins(): LoadedPlugin[] {
+    return Array.from(this.registry.getAll())
+  }
+
+  /**
+   * Get enabled plugins
+   */
+  getEnabledPlugins(): LoadedPlugin[] {
+    return Array.from(this.registry.getEnabled())
+  }
+
+  /**
+   * Get disabled plugins
+   */
+  getDisabledPlugins(): LoadedPlugin[] {
+    return Array.from(this.registry.getAll()).filter(p => !p.enabled)
+  }
+
+  /**
+   * Get a specific plugin by ID
+   */
+  getPlugin(pluginId: string): LoadedPlugin | undefined {
+    return this.registry.get(pluginId)
+  }
+
+  /**
    * Get plugin registry
    */
   getRegistry(): PluginRegistry {
@@ -414,17 +437,17 @@ export class PluginManager {
    * Create plugin context
    */
   private createPluginContext(packageName: string): PluginContext {
-    const pluginId = this.extractPluginId(packageName)
+    const pluginId = extractPluginId(packageName)
 
     const logger: PluginLogger = {
       debug: (message: string, ...args: any[]) => 
-        console.debug(`[Plugin:${pluginId}]`, message, ...args),
+        logDebug(message, { component: 'Plugin', pluginId, args }),
       info: (message: string, ...args: any[]) => 
-        console.info(`[Plugin:${pluginId}]`, message, ...args),
+        logInfo(message, { component: 'Plugin', pluginId, args }),
       warn: (message: string, ...args: any[]) => 
-        console.warn(`[Plugin:${pluginId}]`, message, ...args),
+        logWarn(message, { component: 'Plugin', pluginId, args }),
       error: (message: string, ...args: any[]) => 
-        console.error(`[Plugin:${pluginId}]`, message, ...args),
+        logError(message, undefined, { component: 'Plugin', pluginId, args }),
     }
 
     return {
@@ -438,23 +461,10 @@ export class PluginManager {
   }
 
   /**
-   * Extract plugin ID from package name
-   */
-  private extractPluginId(packageName: string): string {
-    if (packageName.startsWith('@')) {
-      const parts = packageName.split('/')
-      if (parts.length === 2) {
-        return parts[1].replace('plugin-', '')
-      }
-    }
-    return packageName.replace('plugin-', '')
-  }
-
-  /**
    * Shutdown plugin system
    */
   async shutdown(): Promise<void> {
-    console.log('[PluginManager] Shutting down plugin system...')
+    logInfo('Shutting down plugin system...', { component: 'PluginManager' })
 
     // Disable all plugins
     for (const plugin of this.registry.getEnabled()) {
@@ -467,7 +477,7 @@ export class PluginManager {
     this.registry.clear()
 
     this.initialized = false
-    console.log('[PluginManager] Plugin system shut down')
+    logInfo('Plugin system shut down', { component: 'PluginManager' })
   }
 }
 

@@ -6,6 +6,7 @@
 
 import { useMemo } from 'react'
 import { usePluginContext } from './usePluginContext'
+import { getNestedValue } from '../utils'
 
 /**
  * Hook to get configuration for a specific plugin
@@ -31,10 +32,7 @@ export function usePluginConfig<T = any>(pluginId: string): T | undefined {
   const { manager, initialized } = usePluginContext()
 
   return useMemo(() => {
-    if (!initialized) {
-      return undefined
-    }
-
+    if (!initialized) return undefined
     return manager.getPluginConfig<T>(pluginId)
   }, [manager, pluginId, initialized])
 }
@@ -59,22 +57,7 @@ export function usePluginConfigValue(pluginId: string, path: string): any {
   const config = usePluginConfig(pluginId)
 
   return useMemo(() => {
-    if (!config) {
-      return undefined
-    }
-
-    // Navigate through the path
-    const keys = path.split('.')
-    let value: any = config
-
-    for (const key of keys) {
-      if (value === null || value === undefined) {
-        return undefined
-      }
-      value = value[key]
-    }
-
-    return value
+    return config ? getNestedValue(config, path) : undefined
   }, [config, path])
 }
 

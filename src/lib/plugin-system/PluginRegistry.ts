@@ -5,6 +5,7 @@
  * Maintains a central registry of available and loaded plugins.
  */
 
+import { logDebug, logInfo } from '../logger'
 import {
   PluginManifest,
   PluginConfiguration,
@@ -14,6 +15,7 @@ import {
 } from './types'
 import { PluginLoader } from './PluginLoader'
 import { PluginValidator } from './PluginValidator'
+import { extractPluginId, deepMerge } from './utils'
 
 export class PluginRegistry {
   private plugins: Map<string, LoadedPlugin> = new Map()
@@ -32,7 +34,7 @@ export class PluginRegistry {
     config: PluginConfiguration,
     context: PluginContext
   ): Promise<LoadedPlugin> {
-    const pluginId = this.extractPluginId(config.package)
+    const pluginId = extractPluginId(config.package)
 
     // Check if already registered
     if (this.plugins.has(pluginId)) {
@@ -65,7 +67,10 @@ export class PluginRegistry {
     // Store in registry
     this.plugins.set(manifest.id, loadedPlugin)
 
-    console.log(`[PluginRegistry] Registered plugin: ${manifest.id}`)
+    logInfo(`Registered plugin: ${manifest.id}`, { 
+      component: 'PluginRegistry',
+      pluginId: manifest.id 
+    })
 
     return loadedPlugin
   }
@@ -85,7 +90,10 @@ export class PluginRegistry {
     }
 
     this.plugins.delete(pluginId)
-    console.log(`[PluginRegistry] Unregistered plugin: ${pluginId}`)
+    logInfo(`Unregistered plugin: ${pluginId}`, { 
+      component: 'PluginRegistry',
+      pluginId 
+    })
 
     return true
   }
@@ -132,26 +140,12 @@ export class PluginRegistry {
     const plugin = this.plugins.get(pluginId)
     if (plugin) {
       plugin.status = status
-      console.log(`[PluginRegistry] Plugin ${pluginId} status: ${status}`)
+      logDebug(`Plugin ${pluginId} status: ${status}`, { 
+        component: 'PluginRegistry',
+        pluginId,
+        status 
+      })
     }
-  }
-
-  /**
-   * Extract plugin ID from package name
-   * @example '@core-erp/plugin-inventory' -> 'inventory'
-   * @example 'plugin-custom' -> 'custom'
-   */
-  private extractPluginId(packageName: string): string {
-    // Handle scoped packages: @core-erp/plugin-inventory -> inventory
-    if (packageName.startsWith('@')) {
-      const parts = packageName.split('/')
-      if (parts.length === 2) {
-        return parts[1].replace('plugin-', '')
-      }
-    }
-
-    // Handle regular packages: plugin-inventory -> inventory
-    return packageName.replace('plugin-', '')
   }
 
   /**
@@ -165,24 +159,7 @@ export class PluginRegistry {
     const coreOverrides = coreConfig.config || {}
 
     // Deep merge: core config takes precedence
-    return this.deepMerge(pluginDefaults, coreOverrides)
-  }
-
-  /**
-   * Deep merge two objects
-   */
-  private deepMerge(target: any, source: any): any {
-    const result = { ...target }
-
-    for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this.deepMerge(target[key] || {}, source[key])
-      } else {
-        result[key] = source[key]
-      }
-    }
-
-    return result
+    return deepMerge(pluginDefaults, coreOverrides)
   }
 
   /**
@@ -219,7 +196,7 @@ export class PluginRegistry {
    */
   clear(): void {
     this.plugins.clear()
-    console.log('[PluginRegistry] Cleared all plugins')
+    logDebug('Cleared all plugins', { component: 'PluginRegistry' })
   }
 }
 

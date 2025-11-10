@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useRole, usePermissions, useAuth } from '@core-erp/entity'
 import { supabase } from '@/lib/supabase'
@@ -25,12 +25,12 @@ export default function RoleDetail() {
   const [isSaving, setIsSaving] = useState(false)
 
   // Initialize selected permissions when role loads
-  useState(() => {
+  useEffect(() => {
     if (role?.permissions) {
-      const permissionIds = role.permissions.map((rp: any) => rp.permission.id)
+      const permissionIds = role.permissions.map((rp: { permission: { id: string } }) => rp.permission.id)
       setSelectedPermissions(permissionIds)
     }
-  })
+  }, [role])
 
   const handleTogglePermission = (permissionId: string) => {
     setSelectedPermissions(prev =>
@@ -75,9 +75,9 @@ export default function RoleDetail() {
           permission_id,
         }))
 
-        const { error: insertError } = await supabase
-          .from('role_permissions')
-          .insert(inserts as any)
+        const { error: insertError} = await (supabase
+          .from('role_permissions') as any)
+          .insert(inserts)
 
         if (insertError) throw insertError
       }
@@ -85,8 +85,9 @@ export default function RoleDetail() {
       queryClient.invalidateQueries({ queryKey: ['roles'] })
       queryClient.invalidateQueries({ queryKey: ['roles', id] })
       toast.success('Permissions updated successfully')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update permissions')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update permissions'
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -143,8 +144,9 @@ export default function RoleDetail() {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => navigate('/roles')}>
+                <Button variant="ghost" size="icon" onClick={() => navigate('/roles')} aria-label="Back to roles">
                   <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to roles</span>
                 </Button>
                 <div>
                   <div className="flex items-center gap-2">

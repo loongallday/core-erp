@@ -5,6 +5,8 @@
  * Allows plugins to extend core functionality at specific points.
  */
 
+import { logDebug, logError } from '../logger'
+
 export class HookRegistry {
   private hooks: Map<string, Function[]> = new Map()
 
@@ -27,7 +29,11 @@ export class HookRegistry {
     // Sort by priority (lower number = higher priority)
     callbacks.sort((a: any, b: any) => (a.__priority || 10) - (b.__priority || 10))
 
-    console.log(`[HookRegistry] Registered hook: ${hookName} (priority: ${priority})`)
+    logDebug(`Registered hook: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName,
+      priority 
+    })
   }
 
   /**
@@ -52,7 +58,10 @@ export class HookRegistry {
       this.hooks.delete(hookName)
     }
 
-    console.log(`[HookRegistry] Unregistered hook: ${hookName}`)
+    logDebug(`Unregistered hook: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName 
+    })
     return true
   }
 
@@ -64,11 +73,14 @@ export class HookRegistry {
     const callbacks = this.hooks.get(hookName)
     
     if (!callbacks || callbacks.length === 0) {
-      // No hooks registered, return first argument unchanged
       return args[0]
     }
 
-    console.log(`[HookRegistry] Executing hook: ${hookName} (${callbacks.length} callbacks)`)
+    logDebug(`Executing hook: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName,
+      callbackCount: callbacks.length 
+    })
 
     let result = args[0]
     const otherArgs = args.slice(1)
@@ -77,7 +89,10 @@ export class HookRegistry {
       try {
         result = await callback(result, ...otherArgs)
       } catch (error) {
-        console.error(`[HookRegistry] Error executing hook ${hookName}:`, error)
+        logError(`Error executing hook ${hookName}`, error as Error, { 
+          component: 'HookRegistry',
+          hookName 
+        })
         throw error
       }
     }
@@ -95,7 +110,10 @@ export class HookRegistry {
       return []
     }
 
-    console.log(`[HookRegistry] Executing hook in parallel: ${hookName}`)
+    logDebug(`Executing hook in parallel: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName 
+    })
 
     const promises = callbacks.map(callback => callback(...args))
     return await Promise.all(promises)
@@ -111,7 +129,10 @@ export class HookRegistry {
       return []
     }
 
-    console.log(`[HookRegistry] Collecting hook results: ${hookName}`)
+    logDebug(`Collecting hook results: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName 
+    })
 
     const results: any[] = []
 
@@ -122,7 +143,10 @@ export class HookRegistry {
           results.push(result)
         }
       } catch (error) {
-        console.error(`[HookRegistry] Error collecting from hook ${hookName}:`, error)
+        logError(`Error collecting from hook ${hookName}`, error as Error, { 
+          component: 'HookRegistry',
+          hookName 
+        })
       }
     }
 
@@ -139,7 +163,10 @@ export class HookRegistry {
       return null
     }
 
-    console.log(`[HookRegistry] Executing hook until result: ${hookName}`)
+    logDebug(`Executing hook until result: ${hookName}`, { 
+      component: 'HookRegistry',
+      hookName 
+    })
 
     for (const callback of callbacks) {
       try {
@@ -148,7 +175,10 @@ export class HookRegistry {
           return result
         }
       } catch (error) {
-        console.error(`[HookRegistry] Error in hook ${hookName}:`, error)
+        logError(`Error in hook ${hookName}`, error as Error, { 
+          component: 'HookRegistry',
+          hookName 
+        })
       }
     }
 
@@ -190,10 +220,13 @@ export class HookRegistry {
   clear(hookName?: string): void {
     if (hookName) {
       this.hooks.delete(hookName)
-      console.log(`[HookRegistry] Cleared hooks for: ${hookName}`)
+      logDebug(`Cleared hooks for: ${hookName}`, { 
+        component: 'HookRegistry',
+        hookName 
+      })
     } else {
       this.hooks.clear()
-      console.log('[HookRegistry] Cleared all hooks')
+      logDebug('Cleared all hooks', { component: 'HookRegistry' })
     }
   }
 

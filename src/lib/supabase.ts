@@ -10,5 +10,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createSupabaseClient({
   url: supabaseUrl,
   anonKey: supabaseAnonKey,
+  options: {
+    global: {
+      headers: {
+        'x-client-info': 'core-erp@1.0.0',
+      },
+    },
+    db: {
+      schema: 'public',
+    },
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  },
 })
-
