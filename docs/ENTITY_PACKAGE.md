@@ -1,8 +1,8 @@
-# @core-erp/entity Package
+# @composable-erp/core-entity Package
 
 ## Overview
 
-The `@core-erp/entity` package is a **shared package** that provides all core Supabase-related functionality for the composable ERP system. It was extracted from `core-erp` to enable code sharing across all applications.
+The `@composable-erp/core-entity` package is a **shared package** that provides all core Supabase-related functionality for the composable ERP system. It was extracted from `core-erp` to enable code sharing across all applications.
 
 ## What's Included
 
@@ -45,7 +45,7 @@ The `@core-erp/entity` package is a **shared package** that provides all core Su
 
 ## Architecture Principle
 
-**Critical**: The `@core-erp/entity` package is **fully configurable** and **never reads environment variables**.
+**Critical**: The `@composable-erp/core-entity` package is **fully configurable** and **never reads environment variables**.
 
 All configuration (Supabase URL, keys, etc.) must be passed from the consuming application.
 
@@ -70,7 +70,7 @@ npm login --registry=https://your-private-registry.com
 // package.json
 {
   "dependencies": {
-    "@core-erp/entity": "^1.0.0",
+    "@composable-erp/core-entity": "^1.0.0",
     "@core-erp/ui": "^1.0.0"
   }
 }
@@ -84,7 +84,7 @@ npm install
 
 ```typescript
 // src/lib/supabase.ts
-import { createSupabaseClient } from '@core-erp/entity'
+import { createSupabaseClient } from '@composable-erp/core-entity'
 
 export const supabase = createSupabaseClient({
   url: import.meta.env.VITE_SUPABASE_URL,
@@ -96,7 +96,7 @@ export const supabase = createSupabaseClient({
 
 ```typescript
 // src/main.tsx
-import { SupabaseProvider, AuthProvider } from '@core-erp/entity'
+import { SupabaseProvider, AuthProvider } from '@composable-erp/core-entity'
 import { toast } from 'sonner'
 import { supabase } from './lib/supabase'
 
@@ -111,7 +111,7 @@ import { supabase } from './lib/supabase'
 
 ```typescript
 // src/pages/Users.tsx
-import { useAuth, useUsers } from '@core-erp/entity'
+import { useAuth, useUsers } from '@composable-erp/core-entity'
 
 function Users() {
   const { hasPermission } = useAuth()
@@ -138,7 +138,7 @@ function Users() {
 ### 6. Use Validation Schemas
 
 ```typescript
-import { createUserSchema } from '@core-erp/entity'
+import { createUserSchema } from '@composable-erp/core-entity'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
@@ -266,16 +266,16 @@ git push origin main --tags
 
 ### Update in Consuming Apps
 
-After publishing a new version of `@core-erp/entity`:
+After publishing a new version of `@composable-erp/core-entity`:
 
 ```bash
 cd core-erp
 
 # Update to specific version
-npm install @core-erp/entity@1.2.0
+npm install @composable-erp/core-entity@1.2.0
 
 # Or update to latest
-npm update @core-erp/entity
+npm update @composable-erp/core-entity
 
 # Verify
 npm run type-check
@@ -286,12 +286,12 @@ npm run build
 
 ### Applying Migrations
 
-Migrations are included in the `@core-erp/entity` package:
+Migrations are included in the `@composable-erp/core-entity` package:
 
 **Option 1: Extract from node_modules**
 ```bash
 # In your core-erp project
-cp -r node_modules/@core-erp/entity/supabase/migrations ./supabase/
+cp -r node_modules/@composable-erp/core-entity/supabase/migrations ./supabase/
 supabase db push --project-ref <project-ref>
 ```
 
@@ -309,7 +309,7 @@ Edge Functions are included in the package:
 **Option 1: Extract from node_modules**
 ```bash
 # In your core-erp project
-cp -r node_modules/@core-erp/entity/supabase/functions ./supabase/
+cp -r node_modules/@composable-erp/core-entity/supabase/functions ./supabase/
 
 # Deploy functions
 supabase functions deploy get-user-permissions --project-ref <project-ref>
@@ -351,8 +351,8 @@ done
 
 ## Package Repository
 
-The `@core-erp/entity` package is maintained in a separate repository:
+The `@composable-erp/core-entity` package is maintained in a separate repository:
 - **Repository**: https://github.com/your-org/core-entity
-- **npm Package**: `@core-erp/entity`
+- **npm Package**: `@composable-erp/core-entity`
 - **Registry**: Private npm registry (GitHub Packages, npm, or self-hosted)
 

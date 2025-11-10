@@ -6,8 +6,8 @@ This document explains how to set up, publish, and consume the private `@core-er
 
 Core ERP uses two **private npm packages** published to a private registry:
 
-- **@core-erp/entity** - Database types, hooks, contexts, validation, migrations, Edge Functions
-- **@core-erp/ui** - UI components and design system
+- **@composable-erp/core-entity** - Database types, hooks, contexts, validation, migrations, Edge Functions
+- **@composable-erp/core-ui** - UI components and design system
 
 ## Private Registry Options
 
@@ -21,7 +21,7 @@ Core ERP uses two **private npm packages** published to a private registry:
 
 ```json
 {
-  "name": "@core-erp/entity",
+  "name": "@composable-erp/core-entity",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -57,7 +57,7 @@ npm publish
 
 ```json
 {
-  "name": "@core-erp/entity",
+  "name": "@composable-erp/core-entity",
   "private": true
 }
 ```
@@ -81,7 +81,7 @@ npm publish --access restricted
 
 ## Publishing Packages
 
-### 1. @core-erp/entity
+### 1. @composable-erp/core-entity
 
 ```bash
 # Clone and navigate to entity repo
@@ -104,7 +104,7 @@ npm publish
 **Package structure**:
 ```json
 {
-  "name": "@core-erp/entity",
+  "name": "@composable-erp/core-entity",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -115,7 +115,7 @@ npm publish
 }
 ```
 
-### 2. @core-erp/ui
+### 2. @composable-erp/core-ui
 
 ```bash
 # Clone and navigate to UI repo
@@ -164,8 +164,8 @@ npm login
 ```json
 {
   "dependencies": {
-    "@core-erp/entity": "^1.0.0",
-    "@core-erp/ui": "^1.0.0"
+    "@composable-erp/core-entity": "^1.0.0",
+    "@composable-erp/core-ui": "^1.0.0"
   }
 }
 ```
@@ -178,8 +178,8 @@ npm install
 
 ```typescript
 // Import from published packages
-import { useAuth, useUsers, createSupabaseClient } from '@core-erp/entity'
-import { Button, Card, Dialog } from '@core-erp/ui/components/ui'
+import { useAuth, useUsers, createSupabaseClient } from '@composable-erp/core-entity'
+import { Button, Card, Dialog } from '@composable-erp/core-ui/components/ui'
 ```
 
 ## Version Management
@@ -206,16 +206,16 @@ In consuming apps (e.g., core-erp):
 
 ```bash
 # Update to latest patch version
-npm update @core-erp/entity
+npm update @composable-erp/core-entity
 
 # Update to specific version
-npm install @core-erp/entity@1.2.0
+npm install @composable-erp/core-entity@1.2.0
 
 # Update to latest minor version
-npm install @core-erp/entity@^1.2.0
+npm install @composable-erp/core-entity@^1.2.0
 
 # Always use latest
-npm install @core-erp/entity@latest
+npm install @composable-erp/core-entity@latest
 ```
 
 ## CI/CD Integration
@@ -294,7 +294,7 @@ jobs:
 
 ## Database Migrations
 
-Migrations are included in `@core-erp/entity` package under `supabase/migrations/`.
+Migrations are included in `@composable-erp/core-entity` package under `supabase/migrations/`.
 
 ### Applying Migrations
 
@@ -302,7 +302,7 @@ Migrations are included in `@core-erp/entity` package under `supabase/migrations
 
 ```bash
 # Copy migrations to local supabase folder
-cp -r node_modules/@core-erp/entity/supabase/migrations ./supabase/
+cp -r node_modules/@composable-erp/core-entity/supabase/migrations ./supabase/
 
 # Apply migrations
 supabase db push --project-ref <project-ref>
@@ -321,7 +321,7 @@ supabase db push --project-ref <project-ref>
 
 ## Edge Functions Deployment
 
-Edge Functions are included in the `@core-erp/entity` package.
+Edge Functions are included in the `@composable-erp/core-entity` package.
 
 ### Deploying Functions
 
@@ -329,7 +329,7 @@ Edge Functions are included in the `@core-erp/entity` package.
 
 ```bash
 # Copy functions to local supabase folder
-cp -r node_modules/@core-erp/entity/supabase/functions ./supabase/
+cp -r node_modules/@composable-erp/core-entity/supabase/functions ./supabase/
 
 # Deploy functions
 supabase functions deploy get-user-permissions --project-ref <project-ref>
@@ -461,10 +461,10 @@ If you previously used `file:../core-entity`:
 1. **Update package.json**:
    ```json
    // Before
-   "@core-erp/entity": "file:../core-entity"
+   "@composable-erp/core-entity": "file:../core-entity"
    
    // After
-   "@core-erp/entity": "^1.0.0"
+   "@composable-erp/core-entity": "^1.0.0"
    ```
 
 2. **Setup authentication** (see above)

@@ -62,13 +62,13 @@ The Core ERP plugin system is **fully implemented and ready to use**. You can:
 
 ```bash
 # 1. Install
-npm install @core-erp/plugin-inventory
+npm install @composable-erp/plugin-inventory
 
 # 2. Configure (edit plugins.config.ts)
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-inventory',
+      package: '@composable-erp/plugin-inventory',
       enabled: true,
       config: { defaultWarehouse: 'main' },
       permissions: {
@@ -132,7 +132,7 @@ export const plugin = {
 // Core says: "Use them like this"
 // plugins.config.ts
 {
-  package: '@core-erp/plugin-inventory',
+  package: '@composable-erp/plugin-inventory',
   enabled: true,
   ui: {
     sidebar: {
@@ -162,7 +162,7 @@ Everything controlled via `plugins.config.ts`:
 ### Add a Plugin
 
 ```bash
-npm install @core-erp/plugin-name
+npm install @composable-erp/plugin-name
 # Edit plugins.config.ts
 npm run dev
 ```
@@ -177,7 +177,7 @@ npm run dev
 ### Update a Plugin
 
 ```bash
-npm update @core-erp/plugin-name
+npm update @composable-erp/plugin-name
 # Check changelog for breaking changes
 npm run dev
 ```
@@ -187,7 +187,7 @@ npm run dev
 ```typescript
 // plugins.config.ts
 {
-  package: '@core-erp/plugin-name',
+  package: '@composable-erp/plugin-name',
   config: { /* your settings */ },
   localization: {
     en: { 'plugin.key': 'Custom Text' },

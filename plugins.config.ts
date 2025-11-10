@@ -36,8 +36,56 @@ const config: PluginsConfiguration = {
   // PLUGIN CONFIGURATIONS
   // =========================================================================
   plugins: [
-    // -------------------------------------------------------------------------
-    // EXAMPLE: How to configure a plugin (commented out - no plugins installed yet)
+    // Leave Management Plugin
+    {
+      package: '@composable-erp/core-leave',
+      enabled: true,
+      config: {
+        autoApproveThreshold: 0,
+        requireAttachmentDays: 5,
+        allowNegativeBalance: false,
+        workingDaysOnly: true,
+        weekendDays: [0, 6],
+        publicHolidays: [],
+        notifyApproverEmail: true,
+        notifyApproverDaysBefore: 7,
+        allowOverlappingRequests: false,
+        maxAdvanceBookingDays: 365,
+      },
+      permissions: {
+        'leave:view-own': ['user', 'manager', 'admin', 'superadmin'],
+        'leave:create-own': ['user', 'manager', 'admin', 'superadmin'],
+        'leave:edit-own': ['user', 'manager', 'admin', 'superadmin'],
+        'leave:cancel-own': ['user', 'manager', 'admin', 'superadmin'],
+        'leave:view-all': ['manager', 'admin', 'superadmin'],
+        'leave:approve': ['manager', 'admin', 'superadmin'],
+        'leave:reject': ['manager', 'admin', 'superadmin'],
+        'leave:manage-balances': ['admin', 'superadmin'],
+        'leave:manage-types': ['admin', 'superadmin'],
+        'leave:view-reports': ['manager', 'admin', 'superadmin'],
+      },
+      ui: {
+        sidebar: {
+          position: 200,
+          icon: 'Calendar',
+          label: 'Leave Management',
+          group: 'hr',
+        },
+        dashboard: {
+          widgets: ['leave-summary'],
+          widgetOrder: [1],
+        },
+      },
+      integration: {
+        connectTo: ['core-calendar', 'core-hr', 'core-payroll'],
+        dataSharing: {
+          'core-calendar': ['leave-dates', 'approval-status'],
+          'core-payroll': ['paid-leave-days', 'unpaid-leave-days'],
+        },
+      },
+    },
+    
+    // EXAMPLE: How to configure a plugin (commented out)
     // -------------------------------------------------------------------------
     // {
     //   // Package name (from npm/private registry/git)

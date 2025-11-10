@@ -1,0 +1,50 @@
+# Development files
+.cursor/
+.vite/
+.vscode/
+.idea/
+node_modules/
+dist/
+
+# Documentation (internal)
+docs/milestones/
+docs/archive/
+docs/testing/
+IMPLEMENTATION_COMPLETE.md
+VERSION.md
+CHANGELOG.md
+
+# Tests
+src/**/*.test.ts
+src/**/*.test.tsx
+src/test/
+vitest.config.ts
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Temporary
+*.tmp
+*.temp
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase local
+.branches/
+.temp/
+
+# Tools
+tools/
+

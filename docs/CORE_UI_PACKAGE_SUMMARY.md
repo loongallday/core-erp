@@ -2,12 +2,12 @@
 
 ## Overview
 
-Successfully created `@core-erp/ui` - a centralized UI package that provides a shared design system, components, and utilities for the Core ERP main application and all plugins.
+Successfully created `@composable-erp/core-ui` - a centralized UI package that provides a shared design system, components, and utilities for the Core ERP main application and all plugins.
 
 ## Package Details
 
 **Location**: `../core-ui/` (sibling directory to core-erp)
-**Package Name**: `@core-erp/ui`
+**Package Name**: `@composable-erp/core-ui`
 **Version**: 1.0.0
 **Type**: Private npm package
 
@@ -68,9 +68,9 @@ Successfully created `@core-erp/ui` - a centralized UI package that provides a s
 ### ✅ Core ERP (Main App)
 
 **Changes Made**:
-- Added `@core-erp/ui` as dependency via `file:../core-ui`
+- Added `@composable-erp/core-ui` as dependency via `file:../core-ui`
 - Updated Tailwind config to use UI preset
-- Migrated all imports to use `@core-erp/ui/*`
+- Migrated all imports to use `@composable-erp/core-ui/*`
 - Removed redundant component folders:
   - ❌ Deleted `src/components/ui/` (48 files)
   - ❌ Deleted `src/components/responsive/` (6 files)
@@ -90,23 +90,23 @@ import { PageHeader } from '@/components/responsive'
 import { cn } from '@/lib/utils'
 
 // After
-import { Button } from '@core-erp/ui/components/ui'
-import { PageHeader } from '@core-erp/ui/components/responsive'
-import { cn } from '@core-erp/ui/lib'
+import { Button } from '@composable-erp/core-ui/components/ui'
+import { PageHeader } from '@composable-erp/core-ui/components/responsive'
+import { cn } from '@composable-erp/core-ui/lib'
 ```
 
 ### ✅ Plugin Template Generator
 
 **Changes Made**:
 - Updated all templates in `src/templates/frontend.ts`
-- All generated plugins will use `@core-erp/ui` by default
+- All generated plugins will use `@composable-erp/core-ui` by default
 - Created `MIGRATION_TO_CORE_UI.md` guide
 
 **Generated Plugin Dependencies**:
 ```json
 {
   "peerDependencies": {
-    "@core-erp/ui": "^1.0.0",
+    "@composable-erp/core-ui": "^1.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   }
@@ -132,7 +132,7 @@ import { cn } from '@core-erp/ui/lib'
 ### Core UI Package (`core-ui/`)
 ```
 core-ui/
-├── package.json              (@core-erp/ui)
+├── package.json              (@composable-erp/core-ui)
 ├── tsconfig.json             (TypeScript config)
 ├── tsconfig.build.json       (Build config)
 ├── vite.config.ts            (Library bundler)
@@ -175,28 +175,28 @@ The package provides granular exports:
 
 ```typescript
 // Main export (everything)
-import * from '@core-erp/ui'
+import * from '@composable-erp/core-ui'
 
 // UI Components
-import { Button, Card, Dialog } from '@core-erp/ui/components/ui'
+import { Button, Card, Dialog } from '@composable-erp/core-ui/components/ui'
 
 // Responsive Components  
-import { PageHeader, ResponsiveGrid } from '@core-erp/ui/components/responsive'
+import { PageHeader, ResponsiveGrid } from '@composable-erp/core-ui/components/responsive'
 
 // Loading Components
-import { SkeletonCard } from '@core-erp/ui/components/loading'
+import { SkeletonCard } from '@composable-erp/core-ui/components/loading'
 
 // All components
-import * from '@core-erp/ui/components'
+import * from '@composable-erp/core-ui/components'
 
 // Utilities
-import { cn, formatDate, formatCurrency } from '@core-erp/ui/lib'
+import { cn, formatDate, formatCurrency } from '@composable-erp/core-ui/lib'
 
 // Hooks
-import { useToast, useIsMobile } from '@core-erp/ui/hooks'
+import { useToast, useIsMobile } from '@composable-erp/core-ui/hooks'
 
 // Tailwind Preset
-import uiPreset from '@core-erp/ui/tailwind-preset'
+import uiPreset from '@composable-erp/core-ui/tailwind-preset'
 ```
 
 ## Usage in Plugins
@@ -207,29 +207,29 @@ When developing plugins:
 ```json
 {
   "peerDependencies": {
-    "@core-erp/ui": "^1.0.0"
+    "@composable-erp/core-ui": "^1.0.0"
   }
 }
 ```
 
 ### 2. Configure Tailwind
 ```typescript
-import uiPreset from '@core-erp/ui/tailwind-preset'
+import uiPreset from '@composable-erp/core-ui/tailwind-preset'
 
 export default {
   presets: [uiPreset],
   content: [
     './src/**/*.{ts,tsx}',
-    './node_modules/@core-erp/ui/dist/**/*.js'
+    './node_modules/@composable-erp/core-ui/dist/**/*.js'
   ]
 }
 ```
 
 ### 3. Use Components
 ```tsx
-import { Button, Card, Table } from '@core-erp/ui/components/ui'
-import { PageHeader, ResponsiveGrid } from '@core-erp/ui/components/responsive'
-import { cn } from '@core-erp/ui/lib'
+import { Button, Card, Table } from '@composable-erp/core-ui/components/ui'
+import { PageHeader, ResponsiveGrid } from '@composable-erp/core-ui/components/responsive'
+import { cn } from '@composable-erp/core-ui/lib'
 
 function PluginPage() {
   return (
@@ -294,18 +294,18 @@ npm run build        # Production build
 cd core-erp
 npm run generate-plugin
 # Follow prompts
-# Generated plugin will automatically use @core-erp/ui
+# Generated plugin will automatically use @composable-erp/core-ui
 ```
 
 ## Migration Guide for Future Plugins
 
 If you have existing plugins that need migration:
 
-1. Add `@core-erp/ui` to peerDependencies
+1. Add `@composable-erp/core-ui` to peerDependencies
 2. Update all component imports:
-   - `@core-erp/components/ui/*` → `@core-erp/ui/components/ui`
-   - `@core-erp/components/responsive` → `@core-erp/ui/components/responsive`
-   - `@core-erp/lib/utils` → `@core-erp/ui/lib`
+   - `@core-erp/components/ui/*` → `@composable-erp/core-ui/components/ui`
+   - `@core-erp/components/responsive` → `@composable-erp/core-ui/components/responsive`
+   - `@core-erp/lib/utils` → `@composable-erp/core-ui/lib`
 3. Update Tailwind config to use preset
 4. Remove any copied UI components
 5. Test and verify
@@ -316,7 +316,7 @@ If you have existing plugins that need migration:
 
 1. **Publish to Private Registry** (Optional)
    - Set up private npm registry
-   - Publish `@core-erp/ui`
+   - Publish `@composable-erp/core-ui`
    - Update dependencies to use registry instead of file:
 
 2. **Add More Shared Utilities**

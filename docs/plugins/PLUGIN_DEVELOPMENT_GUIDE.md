@@ -74,7 +74,7 @@ npm run dev
 ### Package Structure
 
 ```
-@core-erp/plugin-your-plugin/
+@composable-erp/plugin-your-plugin/
 ├── package.json
 ├── tsconfig.json
 ├── README.md
@@ -111,7 +111,7 @@ npm run dev
 
 ### Naming Conventions
 
-- **Package name**: `@core-erp/plugin-{name}` (lowercase, hyphenated)
+- **Package name**: `@composable-erp/plugin-{name}` (lowercase, hyphenated)
 - **Plugin ID**: `{name}` (extracted from package name)
 - **Files**: PascalCase for components, camelCase for utilities
 - **Permissions**: `{plugin-id}:{action}` (e.g., `inventory:create`)
@@ -133,7 +133,7 @@ Update `package.json`:
 
 ```json
 {
-  "name": "@core-erp/plugin-inventory",
+  "name": "@composable-erp/plugin-inventory",
   "version": "1.0.0",
   "description": "Inventory management plugin for Core ERP",
   "main": "dist/index.js",
@@ -148,7 +148,7 @@ Update `package.json`:
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@core-erp/plugin-types": "^1.0.0"
+    "@composable-erp/plugin-types": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.8.0",
@@ -188,7 +188,7 @@ Create `tsconfig.json`:
 Create `src/index.ts`:
 
 ```typescript
-import { PluginManifest } from '@core-erp/plugin-types'
+import { PluginManifest } from '@composable-erp/plugin-types'
 import { z } from 'zod'
 
 // Configuration schema
@@ -266,7 +266,7 @@ Create `src/frontend/routes.tsx`:
 
 ```typescript
 import { lazy } from 'react'
-import { PluginRoute } from '@core-erp/plugin-types'
+import { PluginRoute } from '@composable-erp/plugin-types'
 
 // Lazy load pages for code splitting
 const InventoryList = lazy(() => import('./pages/InventoryList'))
@@ -296,7 +296,7 @@ export default [
 Create `src/frontend/menu.tsx`:
 
 ```typescript
-import { PluginMenuItem } from '@core-erp/plugin-types'
+import { PluginMenuItem } from '@composable-erp/plugin-types'
 
 export default [
   {
@@ -374,7 +374,7 @@ Create `src/frontend/pages/InventoryList.tsx`:
 ```typescript
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { usePluginConfig } from '@core-erp/plugin-system'
+import { usePluginConfig } from '@composable-erp/plugin-system'
 import { InventoryConfig } from '../../index'
 
 export default function InventoryList() {
@@ -423,7 +423,7 @@ Or use file protocol in `package.json`:
 ```json
 {
   "dependencies": {
-    "@core-erp/plugin-inventory": "file:../plugin-inventory"
+    "@composable-erp/plugin-inventory": "file:../plugin-inventory"
   }
 }
 ```
@@ -434,7 +434,7 @@ Or use file protocol in `package.json`:
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-inventory',
+      package: '@composable-erp/plugin-inventory',
       enabled: true,
       config: {
         defaultWarehouse: 'main',

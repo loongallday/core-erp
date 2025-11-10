@@ -9,7 +9,7 @@ Simple, actionable guide for managing plugins in Core ERP.
 ### 1️⃣ Install
 
 ```bash
-npm install @core-erp/plugin-inventory
+npm install @composable-erp/plugin-inventory
 ```
 
 ### 2️⃣ Configure
@@ -20,7 +20,7 @@ Edit `plugins.config.ts`:
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-inventory',
+      package: '@composable-erp/plugin-inventory',
       enabled: true,
       config: {
         // Your settings here
@@ -52,7 +52,7 @@ Edit `plugins.config.ts`:
 
 ```typescript
 {
-  package: '@core-erp/plugin-inventory',
+  package: '@composable-erp/plugin-inventory',
   enabled: false,  // Just change this
 }
 ```
@@ -66,7 +66,7 @@ npm run dev
 ### Option B: Uninstall (Permanent Removal)
 
 ```bash
-npm uninstall @core-erp/plugin-inventory
+npm uninstall @composable-erp/plugin-inventory
 ```
 
 Remove from `plugins.config.ts`:
@@ -92,7 +92,7 @@ npm run dev
 ### 1️⃣ Update Package
 
 ```bash
-npm update @core-erp/plugin-inventory
+npm update @composable-erp/plugin-inventory
 ```
 
 ### 2️⃣ Check Changelog
@@ -136,7 +136,7 @@ npm run dev
 └─────────────────────────────────────────────────────────┘
 
 1. INSTALL
-   └─> npm install @core-erp/plugin-name
+   └─> npm install @composable-erp/plugin-name
    
 2. CONFIGURE
    └─> Edit plugins.config.ts
@@ -189,7 +189,7 @@ npm run db:backup
 
 ```bash
 # 1. Install plugin
-npm install @core-erp/plugin-name
+npm install @composable-erp/plugin-name
 
 # 2. Update config
 # Edit plugins.config.ts
@@ -218,13 +218,13 @@ npm run build
 
 ```bash
 # 1. Install
-npm install @core-erp/plugin-inventory
+npm install @composable-erp/plugin-inventory
 
 # 2. Add to plugins.config.ts
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-inventory',
+      package: '@composable-erp/plugin-inventory',
       enabled: true,
       config: { defaultWarehouse: 'main' },
       permissions: {
@@ -242,7 +242,7 @@ npm run dev
 
 ```bash
 # Install all at once
-npm install @core-erp/plugin-inventory @core-erp/plugin-crm
+npm install @composable-erp/plugin-inventory @composable-erp/plugin-crm
 ```
 
 ```typescript
@@ -250,12 +250,12 @@ npm install @core-erp/plugin-inventory @core-erp/plugin-crm
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-inventory',
+      package: '@composable-erp/plugin-inventory',
       enabled: true,
       // ... config
     },
     {
-      package: '@core-erp/plugin-crm',
+      package: '@composable-erp/plugin-crm',
       enabled: true,
       // ... config
     },
@@ -268,13 +268,13 @@ export default {
 ```typescript
 // Disable one plugin
 {
-  package: '@core-erp/plugin-inventory',
+  package: '@composable-erp/plugin-inventory',
   enabled: false,  // Temporarily disabled
 }
 
 // Other plugins stay enabled
 {
-  package: '@core-erp/plugin-crm',
+  package: '@composable-erp/plugin-crm',
   enabled: true,  // Still active
 }
 ```
@@ -285,18 +285,18 @@ export default {
 // Customer A deployment
 export default {
   plugins: [
-    { package: '@core-erp/plugin-inventory', enabled: true },
-    { package: '@core-erp/plugin-crm', enabled: true },
-    { package: '@core-erp/plugin-accounting', enabled: false },
+    { package: '@composable-erp/plugin-inventory', enabled: true },
+    { package: '@composable-erp/plugin-crm', enabled: true },
+    { package: '@composable-erp/plugin-accounting', enabled: false },
   ],
 }
 
 // Customer B deployment
 export default {
   plugins: [
-    { package: '@core-erp/plugin-inventory', enabled: true },
-    { package: '@core-erp/plugin-crm', enabled: false },
-    { package: '@core-erp/plugin-accounting', enabled: true },
+    { package: '@composable-erp/plugin-inventory', enabled: true },
+    { package: '@composable-erp/plugin-crm', enabled: false },
+    { package: '@composable-erp/plugin-accounting', enabled: true },
   ],
 }
 ```
@@ -325,7 +325,7 @@ After adding/updating a plugin:
 ```typescript
 // Check these:
 1. enabled: true ✓
-2. Package installed: npm list @core-erp/plugin-name ✓
+2. Package installed: npm list @composable-erp/plugin-name ✓
 3. Config syntax correct ✓
 4. Restarted app ✓
 5. Check console for errors ✓
@@ -374,7 +374,7 @@ This file controls everything about plugins.
 
 ```
 package.json  ← Lists installed plugins
-node_modules/@core-erp/plugin-*/  ← Plugin code
+node_modules/@composable-erp/plugin-*/  ← Plugin code
 ```
 
 ### Application Entry Points

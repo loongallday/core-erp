@@ -48,13 +48,13 @@ Each deployment is **completely isolated**:
 - **Components copied from**: ticket-calendar-pro (maintaining design consistency)
 
 **State Management**:
-- React Context (AuthContext from @core-erp/entity, LocaleContext for i18n)
+- React Context (AuthContext from @composable-erp/core-entity, LocaleContext for i18n)
 - TanStack React Query (server state, caching, automatic refetching)
 - React Hook Form + Zod (form state and validation)
 
 **Shared Packages**:
-- **@core-erp/entity** - Database types, Supabase utilities, Auth context, entity hooks, validation schemas
-- **@core-erp/ui** - 48 shadcn/ui components, design system, responsive utilities
+- **@composable-erp/core-entity** - Database types, Supabase utilities, Auth context, entity hooks, validation schemas
+- **@composable-erp/core-ui** - 48 shadcn/ui components, design system, responsive utilities
 
 **Routing**: React Router v6
 - Protected routes with permission checking
@@ -341,7 +341,7 @@ User → user_roles → roles → role_permissions → permissions
 ```
 core-erp/src/
 ├── components/
-│   ├── ui/                    # 48 shadcn/ui components (from @core-erp/ui)
+│   ├── ui/                    # 48 shadcn/ui components (from @composable-erp/core-ui)
 │   │   ├── button.tsx
 │   │   ├── card.tsx
 │   │   ├── dialog.tsx
@@ -376,7 +376,7 @@ core-erp/src/
 │   ├── useTranslations.ts     # I18n hooks
 │   └── use-toast.ts           # Toast notifications
 ├── lib/
-│   ├── supabase.ts            # Configured Supabase client (uses @core-erp/entity)
+│   ├── supabase.ts            # Configured Supabase client (uses @composable-erp/core-entity)
 │   ├── plugin-system/         # 🔌 Plugin system implementation
 │   ├── utils.ts               # Utility functions (cn, etc.)
 │   └── i18n/                  # i18next configuration
@@ -389,7 +389,7 @@ core-erp/src/
 
 ### Core Entity Package Structure
 
-The `@core-erp/entity` package provides all entity-related functionality:
+The `@composable-erp/core-entity` package provides all entity-related functionality:
 
 ```
 ../core-entity/
@@ -428,8 +428,8 @@ The `@core-erp/entity` package provides all entity-related functionality:
 
 ### Key Components Explained
 
-#### AuthContext (from @core-erp/entity)
-**Package**: `@core-erp/entity`  
+#### AuthContext (from @composable-erp/core-entity)
+**Package**: `@composable-erp/core-entity`  
 **File**: `../core-entity/src/contexts/AuthContext.tsx`
 
 **Purpose**: Manage authentication state and user permissions globally
@@ -456,7 +456,7 @@ interface AuthContextType {
 
 **Configuration**:
 ```tsx
-import { AuthProvider } from '@core-erp/entity'
+import { AuthProvider } from '@composable-erp/core-entity'
 import { supabase } from './lib/supabase'
 import { toast } from 'sonner'
 
@@ -475,7 +475,7 @@ import { toast } from 'sonner'
 
 **Usage Throughout App**:
 ```tsx
-import { useAuth } from '@core-erp/entity'
+import { useAuth } from '@composable-erp/core-entity'
 
 const { hasPermission } = useAuth()
 

@@ -1,6 +1,12 @@
 # Core ERP - Foundation System
 
-> A foundational Enterprise Resource Planning (ERP) system with user management, role-based access control (RBAC), and granular permissions. Designed for **per-customer deployment** with complete data isolation.
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](docs/releases/VERSION.md)
+[![Status](https://img.shields.io/badge/status-production%20ready-green.svg)](docs/releases/V1.0.0_FREEZE.md)
+[![Plugins](https://img.shields.io/badge/plugins-1%20available-purple.svg)](docs/plugins/)
+
+> A foundational Enterprise Resource Planning (ERP) system with user management, role-based access control (RBAC), granular permissions, and a **revolutionary composable plugin architecture**. Version 1.0.0 - First stable release!
+
+⚡ **[Quick Start](QUICK_START.md)** | 📚 **[Documentation](docs/DOCUMENTATION_INDEX.md)** | 🏗️ **[Architecture](PROJECT_CONTEXT.md)** | 🚀 **[Deployment](supabase/DEPLOYMENT_GUIDE.md)**
 
 ## 📖 What is Core ERP?
 
@@ -38,31 +44,19 @@ Customer C → core-erp instance → Customer C's Supabase Project
 - Node.js 18+ and npm
 - Supabase account and project
 
-### 1. Configure Private Registry Access
-
-Set up access to the private npm registry:
-
-```bash
-# Login to private npm registry
-npm login --registry=https://your-private-registry.com
-
-# Or set in .npmrc
-echo "@core-erp:registry=https://your-private-registry.com" >> .npmrc
-echo "//your-private-registry.com/:_authToken=YOUR_TOKEN" >> .npmrc
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 cd core-erp
 npm install
 ```
 
-The following private packages will be installed:
-- `@core-erp/entity` - Entity management & database utilities
-- `@core-erp/ui` - UI components & design system
+The following local packages will be installed:
+- `@composable-erp/core-entity` - Entity management & database utilities (from ../core-entity)
+- `@composable-erp/core-ui` - UI components & design system (from ../core-ui)
+- `@composable-erp/core-leave` - Leave management plugin (from ../core-leave)
 
-### 3. Configure Environment
+### 2. Configure Environment
 
 Create `.env` file:
 
@@ -70,6 +64,18 @@ Create `.env` file:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
+
+### 3. Apply Database Setup
+
+**Quick method** - Copy & paste ONE file:
+
+1. Open Supabase SQL Editor
+2. Copy entire content of `supabase/CORE_COMPLETE.sql`
+3. Paste and Run
+
+This sets up all tables, roles, permissions, and translations!
+
+See [QUICK_START.md](QUICK_START.md) for detailed database setup instructions.
 
 ### 4. Start Development Server
 
@@ -79,9 +85,13 @@ npm run dev
 
 Visit: **http://localhost:5175**
 
-### 5. Login
+### 5. Create First User & Login
 
-Use magic link authentication - enter your email and check your inbox for the login link.
+1. Create user in Supabase Auth Dashboard
+2. Link to Core ERP using SQL (see QUICK_START.md Step 4)
+3. Login at http://localhost:5175
+
+Detailed instructions in [QUICK_START.md](QUICK_START.md).
 
 ## 📁 Project Structure
 
@@ -104,7 +114,7 @@ core-erp/
 │   │   ├── useLocale.ts     # Locale management
 │   │   └── useTranslations.ts # I18n hooks
 │   ├── lib/
-│   │   ├── supabase.ts      # Configured Supabase client (uses @core-erp/entity)
+│   │   ├── supabase.ts      # Configured Supabase client (uses @composable-erp/core-entity)
 │   │   ├── plugin-system/   # 🔌 Plugin system
 │   │   └── i18n/            # Localization setup
 │   └── i18n/
@@ -115,12 +125,14 @@ core-erp/
 │   └── testing/             # Testing documentation
 ├── plugins.config.ts        # 🔌 Plugin configuration
 ├── PROJECT_CONTEXT.md       # 📚 COMPREHENSIVE ARCHITECTURE GUIDE
-├── DOCUMENTATION.md         # 📚 COMPLETE DOCUMENTATION INDEX
+├── QUICK_START.md           # ⚡ 5-MINUTE SETUP GUIDE
+├── docs/
+│   └── DOCUMENTATION_INDEX.md # 📚 COMPLETE DOCUMENTATION INDEX
 └── package.json
 
-Private Packages (Published to npm registry):
+Local Packages (Sibling directories):
 
-@core-erp/entity            # 📦 Entity Package
+@composable-erp/core-entity # 📦 Entity Package
 ├── types/                  # Database TypeScript types
 ├── lib/                    # Supabase utilities & permissions
 ├── schemas/                # Zod validation schemas
@@ -130,7 +142,7 @@ Private Packages (Published to npm registry):
     ├── functions/          # Edge Functions (Deno)
     └── migrations/         # SQL migrations
 
-@core-erp/ui                # 🎨 UI Package
+@composable-erp/core-ui     # 🎨 UI Package
 └── components/             # 48 shadcn/ui components
 ```
 
@@ -194,8 +206,8 @@ Custom roles can be created as needed.
 - **React 18** - UI library with TypeScript
 - **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
-- **@core-erp/ui** - 48 accessible shadcn/ui components (shared package)
-- **@core-erp/entity** - Entity management & Supabase utilities (shared package)
+- **@composable-erp/core-ui** - 48 accessible shadcn/ui components (shared package)
+- **@composable-erp/core-entity** - Entity management & Supabase utilities (shared package)
 - **React Router v6** - Client-side routing
 - **TanStack React Query** - Server state management
 - **React Hook Form + Zod** - Form handling and validation
@@ -206,11 +218,11 @@ Custom roles can be created as needed.
 - **Supabase Edge Functions** - Serverless business logic (Deno)
 - **Row Level Security (RLS)** - Database-level security
 
-### Private Packages (Published to npm)
-- **@core-erp/entity** - Database types, hooks, contexts, validation schemas, migrations, Edge Functions
-- **@core-erp/ui** - UI components and design system
+### Local Packages (Sibling directories)
+- **@composable-erp/core-entity** - Database types, hooks, contexts, validation schemas, migrations, Edge Functions
+- **@composable-erp/core-ui** - UI components and design system
 
-Both packages are published as **private npm packages** to a private registry.
+Both packages are installed from sibling directories (../core-entity, ../core-ui).
 
 ### Current Project
 - **Project ID**: gtktmxrshikgehfdopaa
@@ -247,11 +259,11 @@ npm run build
 
 ### Deploy Edge Functions
 
-Edge Functions are included in the `@core-erp/entity` package:
+Edge Functions are included in the `@composable-erp/core-entity` package:
 
 ```bash
 # Extract functions from node_modules
-cp -r node_modules/@core-erp/entity/supabase/functions ./supabase/functions
+cp -r node_modules/@composable-erp/core-entity/supabase/functions ./supabase/functions
 
 # Deploy to Supabase
 supabase functions deploy get-user-permissions --project-ref <project-ref>
@@ -261,7 +273,7 @@ supabase functions deploy assign-roles --project-ref <project-ref>
 supabase functions deploy update-user-locale --project-ref <project-ref>
 ```
 
-Or clone the `@core-erp/entity` repository and deploy from there.
+Or use functions from the `../core-entity` directory.
 
 ### Hosting Options
 
@@ -305,7 +317,7 @@ npm run lint     # Run ESLint
 
 **If updating core entity logic** (requires publishing new version):
 
-1. Clone the `@core-erp/entity` package repository
+1. Modify the `../core-entity` package
 2. **Database**: Create migration in `supabase/migrations/`
 3. **Edge Function**: Create in `supabase/functions/` if needed
 4. **Types**: Update `src/types/database.ts`
@@ -316,8 +328,8 @@ npm run lint     # Run ESLint
 
 **If adding app-specific features**:
 
-1. **UI**: Build pages using `@core-erp/ui` components
-2. **Permissions**: Add permission checks with `hasPermission()` from `@core-erp/entity`
+1. **UI**: Build pages using `@composable-erp/core-ui` components
+2. **Permissions**: Add permission checks with `hasPermission()` from `@composable-erp/core-entity`
 3. **Routes**: Add to `src/App.tsx` with `ProtectedRoute`
 4. **Menu**: Add navigation items to `src/components/AppLayout.tsx`
 
@@ -341,7 +353,7 @@ Core ERP includes a comprehensive plugin system for modular feature development.
 
 **Add a Plugin:**
 ```bash
-npm install @core-erp/plugin-inventory
+npm install @composable-erp/plugin-inventory
 # Edit plugins.config.ts to configure
 npm run dev
 ```
@@ -349,12 +361,12 @@ npm run dev
 **Remove a Plugin:**
 ```typescript
 // plugins.config.ts - Set enabled: false
-{ package: '@core-erp/plugin-inventory', enabled: false }
+{ package: '@composable-erp/plugin-inventory', enabled: false }
 ```
 
 ### Key Features
 
-- ✅ **Private NPM Packages** - Distribute plugins via registry
+- ✅ **NPM Package Distribution** - Plugins as npm packages
 - ✅ **Core-Controlled** - All configuration in `plugins.config.ts`
 - ✅ **Type-Safe** - Full TypeScript support
 - ✅ **Auto-Integration** - Routes, menus, permissions automatically registered

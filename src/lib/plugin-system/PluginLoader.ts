@@ -63,20 +63,35 @@ export class PluginLoader {
    */
   private async dynamicImport(packageName: string): Promise<any> {
     try {
-      // For installed npm packages
-      if (packageName.startsWith('@') || !packageName.startsWith('file:')) {
+      console.log('[PluginLoader] Attempting to import:', packageName)
+      
+      // For scoped packages (@composable-erp/*, @core-erp/*)
+      // Try loading from node_modules directly
+      if (packageName.startsWith('@composable-erp/') || packageName.startsWith('@core-erp/')) {
+        console.log('[PluginLoader] Loading scoped package from node_modules')
+        const modulePath = `/node_modules/${packageName}/dist/index.js`
+        console.log('[PluginLoader] Trying path:', modulePath)
+        return await import(/* @vite-ignore */ modulePath)
+      }
+      
+      // For local relative paths (e.g., ../core-leave/src/index.ts)
+      if (packageName.startsWith('../') || packageName.startsWith('./')) {
+        console.log('[PluginLoader] Loading from relative path:', packageName)
         return await import(/* @vite-ignore */ packageName)
       }
-
-      // For local file paths (development)
+      
+      // For local file paths with file: protocol
       if (packageName.startsWith('file:')) {
         const filePath = packageName.replace('file:', '')
+        console.log('[PluginLoader] Loading from file: protocol:', filePath)
         return await import(/* @vite-ignore */ filePath)
       }
 
-      // For git repositories (will be installed as regular packages)
+      // Default: try as package name
+      console.log('[PluginLoader] Loading as package:', packageName)
       return await import(/* @vite-ignore */ packageName)
     } catch (error) {
+      console.error('[PluginLoader] Import failed for', packageName, error)
       throw new Error(`Failed to import package: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }

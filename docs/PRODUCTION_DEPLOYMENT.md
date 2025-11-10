@@ -29,7 +29,7 @@
 - ✅ Supabase account (Pro plan recommended: $10/month)
 - ✅ Hosting provider account (Vercel/Netlify/Cloudflare Pages)
 - ✅ Domain registrar (for custom domain)
-- ✅ Private npm registry access (for @core-erp/* packages)
+- ✅ Private npm registry access (for @composable-erp/core-* packages)
 
 ### Required Tools
 - ✅ Node.js 18+ and npm
@@ -101,10 +101,10 @@ VITE_APP_TITLE=Your ERP System
 **Option A: Using Supabase Dashboard (Recommended)**
 
 1. Navigate to SQL Editor in Supabase Dashboard
-2. Copy migration files from `@core-erp/entity` package:
+2. Copy migration files from `@composable-erp/core-entity` package:
    ```bash
    # Extract migrations from node_modules
-   cp -r node_modules/@core-erp/entity/supabase/migrations ./supabase/migrations
+   cp -r node_modules/@composable-erp/core-entity/supabase/migrations ./supabase/migrations
    ```
 3. Execute each migration file in order (by timestamp)
 4. Verify tables created: users, roles, permissions, user_roles, role_permissions, audit_log, translations
@@ -195,8 +195,8 @@ SELECT '{user-id-from-above}', id FROM roles WHERE code = 'SUPERADMIN';
 ### 1. Extract Edge Functions
 
 ```bash
-# Copy Edge Functions from @core-erp/entity package
-cp -r node_modules/@core-erp/entity/supabase/functions ./supabase/functions
+# Copy Edge Functions from @composable-erp/core-entity package
+cp -r node_modules/@composable-erp/core-entity/supabase/functions ./supabase/functions
 ```
 
 ### 2. Deploy Functions

@@ -5,7 +5,7 @@ Quick reference guide for Core ERP plugin development.
 ## Package Structure
 
 ```
-@core-erp/plugin-{name}/
+@composable-erp/plugin-{name}/
 ├── package.json
 ├── tsconfig.json
 ├── src/
@@ -32,7 +32,7 @@ Quick reference guide for Core ERP plugin development.
 ### Plugin Manifest
 
 ```typescript
-import { PluginManifest } from '@core-erp/plugin-types'
+import { PluginManifest } from '@composable-erp/plugin-types'
 import { z } from 'zod'
 
 export const configSchema = z.object({
@@ -81,7 +81,7 @@ export const plugin: PluginManifest = {
 
 ```typescript
 import { lazy } from 'react'
-import { PluginRoute } from '@core-erp/plugin-types'
+import { PluginRoute } from '@composable-erp/plugin-types'
 
 const ListPage = lazy(() => import('./pages/ListPage'))
 const FormPage = lazy(() => import('./pages/FormPage'))
@@ -103,7 +103,7 @@ export default [
 ### Menu Items
 
 ```typescript
-import { PluginMenuItem } from '@core-erp/plugin-types'
+import { PluginMenuItem } from '@composable-erp/plugin-types'
 
 export default [
   {
@@ -121,7 +121,7 @@ export default [
 
 ```typescript
 import { useTranslation } from 'react-i18next'
-import { usePluginConfig } from '@core-erp/plugin-system'
+import { usePluginConfig } from '@composable-erp/plugin-system'
 
 export default function MyPage() {
   const { t } = useTranslation('my-plugin')
@@ -180,7 +180,7 @@ export default function MyPage() {
 export default {
   plugins: [
     {
-      package: '@core-erp/plugin-my-plugin',
+      package: '@composable-erp/plugin-my-plugin',
       enabled: true,
       
       config: {
@@ -215,7 +215,7 @@ export default {
 ### usePluginConfig
 
 ```typescript
-import { usePluginConfig } from '@core-erp/plugin-system'
+import { usePluginConfig } from '@composable-erp/plugin-system'
 
 const config = usePluginConfig<MyConfig>('my-plugin')
 ```
@@ -223,7 +223,7 @@ const config = usePluginConfig<MyConfig>('my-plugin')
 ### usePluginFeature
 
 ```typescript
-import { usePluginFeature } from '@core-erp/plugin-system'
+import { usePluginFeature } from '@composable-erp/plugin-system'
 
 const hasFeature = usePluginFeature('my-plugin', 'feature-name')
 ```
@@ -380,7 +380,7 @@ npm run test
 - Check `plugins.config.ts` has correct package name
 - Verify `enabled: true`
 - Check console for errors
-- Ensure plugin is installed: `npm list @core-erp/plugin-name`
+- Ensure plugin is installed: `npm list @composable-erp/plugin-name`
 
 ### Routes not showing
 - Verify route path doesn't conflict
