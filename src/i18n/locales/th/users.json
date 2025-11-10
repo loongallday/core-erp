@@ -1,0 +1,59 @@
+{
+  "title": "ผู้ใช้",
+  "subtitle": "จัดการผู้ใช้ระบบและบทบาทของพวกเขา",
+  "create_user": "สร้างผู้ใช้",
+  "edit_user": "แก้ไขผู้ใช้",
+  "user_details": "รายละเอียดผู้ใช้",
+  "user_list": "รายการผู้ใช้",
+  "fields": {
+    "full_name": "ชื่อ-นามสกุล",
+    "full_name_placeholder": "กรอกชื่อ-นามสกุล",
+    "email": "ที่อยู่อีเมล",
+    "email_placeholder": "user@example.com",
+    "is_active": "สถานะการใช้งาน",
+    "roles": "บทบาท",
+    "select_roles": "เลือกบทบาท",
+    "no_roles": "ไม่มีบทบาทที่กำหนด",
+    "created_at": "สร้างเมื่อ",
+    "updated_at": "แก้ไขล่าสุด"
+  },
+  "validation": {
+    "name_required": "กรุณากรอกชื่อ-นามสกุล",
+    "name_min_length": "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร",
+    "email_required": "กรุณากรอกที่อยู่อีเมล",
+    "email_invalid": "รูปแบบอีเมลไม่ถูกต้อง",
+    "roles_required": "ต้องกำหนดบทบาทอย่างน้อยหนึ่งบทบาท"
+  },
+  "messages": {
+    "create_success": "สร้างผู้ใช้สำเร็จ",
+    "create_error": "สร้างผู้ใช้ไม่สำเร็จ",
+    "update_success": "อัปเดตผู้ใช้สำเร็จ",
+    "update_error": "อัปเดตผู้ใช้ไม่สำเร็จ",
+    "delete_success": "ลบผู้ใช้สำเร็จ",
+    "delete_error": "ลบผู้ใช้ไม่สำเร็จ",
+    "confirm_delete": "คุณแน่ใจหรือว่าต้องการลบผู้ใช้นี้?",
+    "confirm_deactivate": "คุณแน่ใจหรือว่าต้องการปิดการใช้งานผู้ใช้นี้?",
+    "confirm_activate": "คุณแน่ใจหรือว่าต้องการเปิดการใช้งานผู้ใช้นี้?",
+    "no_users": "ไม่พบผู้ใช้",
+    "loading": "กำลังโหลดผู้ใช้..."
+  },
+  "actions": {
+    "add_user": "เพิ่มผู้ใช้ใหม่",
+    "edit_user": "แก้ไขผู้ใช้",
+    "delete_user": "ลบผู้ใช้",
+    "view_user": "ดูผู้ใช้",
+    "activate": "เปิดใช้งาน",
+    "deactivate": "ปิดใช้งาน",
+    "manage_roles": "จัดการบทบาท",
+    "reset_password": "รีเซ็ตรหัสผ่าน"
+  },
+  "table": {
+    "name": "ชื่อ",
+    "email": "อีเมล",
+    "roles": "บทบาท",
+    "status": "สถานะ",
+    "created": "สร้างเมื่อ",
+    "actions": "การดำเนินการ"
+  }
+}
+

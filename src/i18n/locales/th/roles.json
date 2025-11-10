@@ -1,0 +1,78 @@
+{
+  "title": "บทบาท",
+  "subtitle": "จัดการบทบาทและสิทธิ์",
+  "create_role": "สร้างบทบาท",
+  "edit_role": "แก้ไขบทบาท",
+  "role_details": "รายละเอียดบทบาท",
+  "role_list": "รายการบทบาท",
+  "fields": {
+    "name": "ชื่อบทบาท",
+    "name_placeholder": "กรอกชื่อบทบาท",
+    "description": "คำอธิบาย",
+    "description_placeholder": "อธิบายบทบาทนี้",
+    "level": "ระดับ",
+    "level_placeholder": "0-100",
+    "level_description": "ระดับที่สูงกว่ามีอำนาจมากกว่า",
+    "is_system": "บทบาทระบบ",
+    "permissions": "สิทธิ์",
+    "permission_count": "{{count}} สิทธิ์",
+    "permission_count_plural": "{{count}} สิทธิ์",
+    "no_permissions": "ไม่มีสิทธิ์ที่กำหนด",
+    "created_at": "สร้างเมื่อ",
+    "updated_at": "แก้ไขล่าสุด"
+  },
+  "validation": {
+    "name_required": "กรุณากรอกชื่อบทบาท",
+    "name_min_length": "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร",
+    "level_required": "กรุณากรอกระดับ",
+    "level_min": "ระดับต้องมีค่าอย่างน้อย 0",
+    "level_max": "ระดับต้องไม่เกิน 100"
+  },
+  "messages": {
+    "create_success": "สร้างบทบาทสำเร็จ",
+    "create_error": "สร้างบทบาทไม่สำเร็จ",
+    "update_success": "อัปเดตบทบาทสำเร็จ",
+    "update_error": "อัปเดตบทบาทไม่สำเร็จ",
+    "delete_success": "ลบบทบาทสำเร็จ",
+    "delete_error": "ลบบทบาทไม่สำเร็จ",
+    "confirm_delete": "คุณแน่ใจหรือว่าต้องการลบบทบาทนี้?",
+    "cannot_delete_system": "ไม่สามารถลบบทบาทระบบได้",
+    "no_roles": "ไม่พบบทบาท",
+    "loading": "กำลังโหลดบทบาท...",
+    "permissions_updated": "อัปเดตสิทธิ์สำเร็จ",
+    "permissions_error": "อัปเดตสิทธิ์ไม่สำเร็จ"
+  },
+  "actions": {
+    "add_role": "เพิ่มบทบาทใหม่",
+    "edit_role": "แก้ไขบทบาท",
+    "delete_role": "ลบบทบาท",
+    "view_role": "ดูบทบาท",
+    "manage_permissions": "จัดการสิทธิ์",
+    "assign_users": "กำหนดผู้ใช้"
+  },
+  "table": {
+    "name": "ชื่อ",
+    "description": "คำอธิบาย",
+    "level": "ระดับ",
+    "permissions": "สิทธิ์",
+    "users": "ผู้ใช้",
+    "created": "สร้างเมื่อ",
+    "actions": "การดำเนินการ"
+  },
+  "permissions": {
+    "title": "สิทธิ์",
+    "available": "สิทธิ์ที่ใช้ได้",
+    "assigned": "สิทธิ์ที่กำหนด",
+    "categories": {
+      "all": "หมวดหมู่ทั้งหมด",
+      "users": "การจัดการผู้ใช้",
+      "roles": "การจัดการบทบาท",
+      "permissions": "การจัดการสิทธิ์",
+      "system": "การตั้งค่าระบบ"
+    },
+    "search_placeholder": "ค้นหาสิทธิ์...",
+    "select_all": "เลือกทั้งหมด",
+    "deselect_all": "ยกเลิกการเลือกทั้งหมด"
+  }
+}
+

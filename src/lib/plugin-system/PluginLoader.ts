@@ -1,0 +1,143 @@
+/**
+ * Plugin Loader
+ * 
+ * Handles dynamic loading and importing of plugin packages.
+ * Supports loading from npm packages, git repositories, and local files.
+ */
+
+import { PluginManifest } from './types'
+
+export class PluginLoader {
+  private cache: Map<string, PluginManifest> = new Map()
+
+  /**
+   * Load a plugin from package name
+   */
+  async load(packageName: string): Promise<PluginManifest> {
+    // Check cache first
+    if (this.cache.has(packageName)) {
+      console.log(`[PluginLoader] Using cached plugin: ${packageName}`)
+      return this.cache.get(packageName)!
+    }
+
+    console.log(`[PluginLoader] Loading plugin: ${packageName}`)
+
+    try {
+      // Dynamic import of the plugin package
+      const pluginModule = await this.dynamicImport(packageName)
+
+      // Extract manifest
+      const manifest = this.extractManifest(pluginModule)
+
+      // Validate manifest structure
+      this.validateManifestStructure(manifest)
+
+      // Cache the manifest
+      this.cache.set(packageName, manifest)
+
+      console.log(`[PluginLoader] Successfully loaded plugin: ${manifest.id}`)
+
+      return manifest
+    } catch (error) {
+      console.error(`[PluginLoader] Failed to load plugin ${packageName}:`, error)
+      throw new Error(`Failed to load plugin ${packageName}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Dynamic import with proper error handling
+   */
+  private async dynamicImport(packageName: string): Promise<any> {
+    try {
+      // For installed npm packages
+      if (packageName.startsWith('@') || !packageName.startsWith('file:')) {
+        return await import(/* @vite-ignore */ packageName)
+      }
+
+      // For local file paths (development)
+      if (packageName.startsWith('file:')) {
+        const filePath = packageName.replace('file:', '')
+        return await import(/* @vite-ignore */ filePath)
+      }
+
+      // For git repositories (will be installed as regular packages)
+      return await import(/* @vite-ignore */ packageName)
+    } catch (error) {
+      throw new Error(`Failed to import package: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Extract plugin manifest from module
+   */
+  private extractManifest(pluginModule: any): PluginManifest {
+    // Try different export patterns
+    if (pluginModule.plugin) {
+      return pluginModule.plugin
+    }
+
+    if (pluginModule.default && pluginModule.default.plugin) {
+      return pluginModule.default.plugin
+    }
+
+    if (pluginModule.default) {
+      return pluginModule.default
+    }
+
+    throw new Error('Plugin manifest not found. Plugin must export "plugin" or default export.')
+  }
+
+  /**
+   * Validate basic manifest structure
+   */
+  private validateManifestStructure(manifest: any): void {
+    const required = ['id', 'name', 'version', 'description', 'author', 'category']
+
+    for (const field of required) {
+      if (!manifest[field]) {
+        throw new Error(`Plugin manifest missing required field: ${field}`)
+      }
+    }
+
+    // Validate ID format (lowercase, alphanumeric, hyphens only)
+    if (!/^[a-z0-9-]+$/.test(manifest.id)) {
+      throw new Error(`Plugin ID must be lowercase alphanumeric with hyphens only: ${manifest.id}`)
+    }
+
+    // Validate version format (semver)
+    if (!/^\d+\.\d+\.\d+/.test(manifest.version)) {
+      throw new Error(`Plugin version must be valid semver: ${manifest.version}`)
+    }
+  }
+
+  /**
+   * Preload plugins (for better performance)
+   */
+  async preload(packageNames: string[]): Promise<void> {
+    console.log(`[PluginLoader] Preloading ${packageNames.length} plugins...`)
+
+    const promises = packageNames.map((name) => this.load(name))
+    await Promise.allSettled(promises)
+
+    console.log('[PluginLoader] Preload complete')
+  }
+
+  /**
+   * Clear cache
+   */
+  clearCache(): void {
+    this.cache.clear()
+    console.log('[PluginLoader] Cache cleared')
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    return {
+      size: this.cache.size,
+      packages: Array.from(this.cache.keys()),
+    }
+  }
+}
+

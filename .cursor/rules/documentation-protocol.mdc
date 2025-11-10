@@ -1,0 +1,439 @@
+---
+title: Core ERP Documentation Protocol
+description: Guidelines for organizing and maintaining project documentation for context continuity
+---
+
+# Core ERP - Documentation Protocol
+
+## 📁 Documentation Structure
+
+### Root Level Documentation
+Location: Project root `/`
+
+**Primary Documents (Always keep updated):**
+- `README.md` - Project overview, quick start, key features
+- `PROJECT_CONTEXT.md` - Comprehensive architecture guide (master reference)
+- `START_GUIDE.md` - Quick start checklist for new developers
+
+**Purpose:** These are the main entry points for understanding the project.
+
+---
+
+### Logs Directory (`/logs/`)
+Location: `/logs/`
+
+**Update Logs / Result Logs:**
+- `IMPLEMENTATION_STATUS.md` - Current status of all features
+- `COMPLETION_SUMMARY.md` - Session completion summaries
+- `TEST_RESULTS.md` - Test execution results
+- `CHANGELOG.md` - Version history and changes
+
+**Naming Convention:**
+- Use `YYYYMMDD_session_name.md` for session logs
+- Use `YYYYMMDD_test_name.md` for test results
+- Always include date prefix for chronological sorting
+
+**Purpose:** Track progress, decisions, and test results over time.
+
+---
+
+### Documentation Directory (`/docs/`)
+Location: `/docs/`
+
+**Organized by Category:**
+
+#### `/docs/architecture/`
+- `database-schema.md` - Complete database schema documentation
+- `security-model.md` - Authentication, authorization, RLS policies
+- `permission-system.md` - How permissions work
+- `edge-functions.md` - Server-side logic documentation
+- `state-management.md` - React Query, Context API patterns
+
+#### `/docs/guides/`
+- `development-setup.md` - Setting up development environment
+- `creating-users.md` - How to create and manage users
+- `managing-roles.md` - Role management guide
+- `deploying.md` - Deployment instructions
+- `troubleshooting.md` - Common issues and solutions
+
+#### `/docs/api/`
+- `edge-functions-api.md` - All Edge Functions endpoints
+- `database-queries.md` - Common database query patterns
+- `hooks-reference.md` - React Query hooks documentation
+- `component-api.md` - Component props and usage
+
+#### `/docs/testing/`
+- `test-strategy.md` - Testing approach and coverage
+- `manual-tests.md` - Manual testing checklists
+- `automated-tests.md` - Automated test documentation
+
+#### `/docs/deployment/`
+- `production-checklist.md` - Pre-deployment checklist
+- `environment-setup.md` - Environment variables
+- `migration-guide.md` - Running database migrations
+- `edge-function-deployment.md` - Deploying Edge Functions
+
+**Purpose:** Detailed, organized documentation by topic.
+
+---
+
+## 🔄 Update Protocol
+
+### When to Update Documentation
+
+#### After Major Features
+1. Update `PROJECT_CONTEXT.md` with new architecture details
+2. Create entry in `logs/IMPLEMENTATION_STATUS.md`
+3. Add relevant guide to `/docs/guides/`
+4. Update API documentation if endpoints changed
+
+#### After Testing
+1. Create or update `logs/YYYYMMDD_test_results.md`
+2. Update `TEST_RESULTS.md` summary
+3. Document any bugs found in issues tracker
+
+#### After Deployment
+1. Update `logs/CHANGELOG.md` with version
+2. Create deployment log in `/logs/`
+3. Update production documentation
+
+#### Daily/Session End
+1. Create session summary in `/logs/`
+2. Update `IMPLEMENTATION_STATUS.md`
+3. Note any blockers or next steps
+
+---
+
+## 📝 Writing Guidelines
+
+### Document Headers (Always Include)
+
+```markdown
+# [Document Title]
+
+**Last Updated:** YYYY-MM-DD  
+**Status:** 🟢 Current / 🟡 Needs Update / 🔴 Deprecated  
+**Related Docs:** [Links to related documentation]
+
+---
+
+## Quick Overview
+[2-3 sentence summary of what this document covers]
+```
+
+### Use Status Indicators
+
+- 🟢 **Complete/Working** - Feature is done and tested
+- 🟡 **In Progress** - Work is ongoing
+- 🔴 **Blocked** - Waiting on something
+- ⏳ **Pending** - Not started yet
+- ⚠️ **Needs Attention** - Has issues
+- ✅ **Verified** - Tested and confirmed working
+
+### Code Examples
+
+Always include:
+- File path
+- Line numbers (if referencing existing code)
+- Context comments
+- Expected output/behavior
+
+```typescript
+// src/hooks/useUsers.ts
+export function useUsers() {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      // Fetch users with their roles
+      const { data, error } = await supabase
+        .from('users')
+        .select('*, roles:user_roles(role:roles(*))')
+      if (error) throw error
+      return data
+    }
+  })
+}
+```
+
+---
+
+## 🎯 Context Continuity Rules
+
+### For AI Assistants
+
+When starting a new session:
+
+1. **Read First (Priority Order):**
+   - `README.md` - Get project overview
+   - `PROJECT_CONTEXT.md` - Understand full architecture
+   - Latest `logs/IMPLEMENTATION_STATUS.md` - Know current state
+   - `.cursorrules` - Follow project-specific rules
+
+2. **Update During Session:**
+   - Create session log in `/logs/YYYYMMDD_session_description.md`
+   - Update status documents as features complete
+   - Note any architectural decisions made
+
+3. **Before Ending Session:**
+   - Update `IMPLEMENTATION_STATUS.md`
+   - Create `COMPLETION_SUMMARY.md` in `/logs/`
+   - List next steps clearly
+   - Update `PROJECT_CONTEXT.md` if architecture changed
+
+### For Developers
+
+When returning to project:
+
+1. **Quick Catch-Up:**
+   - Read latest log in `/logs/` (sorted by date)
+   - Check `IMPLEMENTATION_STATUS.md` for current state
+   - Review `PROJECT_CONTEXT.md` if needed
+
+2. **Before Starting Work:**
+   - Create new session log
+   - Note your goals for this session
+
+3. **During Work:**
+   - Update relevant documentation as you go
+   - Document decisions in session log
+
+---
+
+## 📊 Log Templates
+
+### Session Log Template
+
+```markdown
+# Session Log: [Session Name]
+
+**Date:** YYYY-MM-DD  
+**Duration:** X hours  
+**Status:** ✅ Complete / 🟡 In Progress
+
+## Goals
+- [ ] Goal 1
+- [ ] Goal 2
+- [ ] Goal 3
+
+## What Was Done
+1. **Feature/Task 1**
+   - Description
+   - Files changed
+   - Status: ✅
+
+2. **Feature/Task 2**
+   - Description
+   - Files changed
+   - Status: ✅
+
+## Decisions Made
+- Decision 1: Reasoning
+- Decision 2: Reasoning
+
+## Issues Encountered
+- Issue 1: How it was resolved
+- Issue 2: Still pending
+
+## Next Steps
+1. Next task 1
+2. Next task 2
+3. Next task 3
+
+## Files Modified
+- `path/to/file1.ts` - Description
+- `path/to/file2.tsx` - Description
+
+## Notes
+Additional context, reminders, or important information
+```
+
+### Test Results Template
+
+```markdown
+# Test Results: [Test Name]
+
+**Date:** YYYY-MM-DD  
+**Test Type:** Unit / Integration / E2E / Manual  
+**Status:** ✅ Pass / ❌ Fail / 🟡 Partial
+
+## Test Summary
+Brief description of what was tested
+
+## Test Cases
+| # | Test Case | Expected | Actual | Status |
+|---|-----------|----------|--------|--------|
+| 1 | Case 1 | Expected result | Actual result | ✅ |
+| 2 | Case 2 | Expected result | Actual result | ❌ |
+
+## Pass Rate
+- Total: X tests
+- Passed: X (XX%)
+- Failed: X (XX%)
+
+## Issues Found
+1. **Issue 1**
+   - Severity: High/Medium/Low
+   - Description
+   - Steps to reproduce
+   - Expected fix
+
+## Recommendations
+- Recommendation 1
+- Recommendation 2
+```
+
+---
+
+## 🔧 Maintenance Schedule
+
+### Weekly
+- [ ] Review and update `IMPLEMENTATION_STATUS.md`
+- [ ] Archive old session logs older than 30 days
+- [ ] Update `PROJECT_CONTEXT.md` if architecture evolved
+
+### Monthly
+- [ ] Review all documentation for accuracy
+- [ ] Update version numbers
+- [ ] Clean up deprecated documents
+- [ ] Create monthly summary log
+
+### Before Major Releases
+- [ ] Complete documentation review
+- [ ] Update all deployment guides
+- [ ] Create release notes
+- [ ] Archive pre-release logs
+
+---
+
+## 📍 Quick Reference
+
+### Where to Find Information
+
+| Need to Know | Look Here | Section |
+|--------------|-----------|---------|
+| Project overview | `README.md` | Root |
+| Full architecture | `PROJECT_CONTEXT.md` | Root |
+| Current status | `logs/IMPLEMENTATION_STATUS.md` | Logs |
+| How to deploy | `docs/deployment/` | Deployment |
+| API endpoints | `docs/api/` | API |
+| Test results | `logs/TEST_RESULTS.md` | Logs |
+| Database schema | `docs/architecture/database-schema.md` | Architecture |
+| Development setup | `docs/guides/development-setup.md` | Guides |
+
+### Quick Commands
+
+```bash
+# View latest logs
+ls -la logs/ | sort -r | head
+
+# Create new session log
+touch logs/$(date +%Y%m%d)_session_name.md
+
+# View current status
+cat logs/IMPLEMENTATION_STATUS.md
+```
+
+---
+
+## ✅ Documentation Checklist
+
+### When Creating New Feature
+
+- [ ] Update `PROJECT_CONTEXT.md` with architecture details
+- [ ] Create guide in `/docs/guides/` if user-facing
+- [ ] Update API docs in `/docs/api/` if endpoints changed
+- [ ] Add tests to `/docs/testing/`
+- [ ] Update `IMPLEMENTATION_STATUS.md`
+- [ ] Create session log in `/logs/`
+
+### When Fixing Bugs
+
+- [ ] Document bug in test results
+- [ ] Update troubleshooting guide
+- [ ] Note fix in session log
+- [ ] Update relevant documentation
+
+### When Refactoring
+
+- [ ] Update architecture docs
+- [ ] Update code examples
+- [ ] Update API docs if signatures changed
+- [ ] Note reasoning in session log
+
+---
+
+## 🎓 Best Practices
+
+### Do's ✅
+- ✅ Keep `PROJECT_CONTEXT.md` as single source of truth
+- ✅ Use consistent date format (YYYY-MM-DD)
+- ✅ Include status indicators in headers
+- ✅ Link related documents
+- ✅ Write for someone who knows nothing about the project
+- ✅ Update documentation as you code, not after
+- ✅ Use templates for consistency
+
+### Don'ts ❌
+- ❌ Don't duplicate information across multiple docs
+- ❌ Don't let documentation get stale
+- ❌ Don't use ambiguous status indicators
+- ❌ Don't skip session logs
+- ❌ Don't forget to date your updates
+- ❌ Don't write documentation for yourself only
+- ❌ Don't make assumptions about reader's knowledge
+
+---
+
+## 📚 Document Hierarchy
+
+```
+Priority 1 (Always Up to Date):
+  └─ PROJECT_CONTEXT.md
+  └─ IMPLEMENTATION_STATUS.md
+
+Priority 2 (Update Weekly):
+  └─ README.md
+  └─ Session logs
+  └─ Test results
+
+Priority 3 (Update as Needed):
+  └─ Guides
+  └─ API docs
+  └─ Architecture docs
+
+Priority 4 (Update Before Release):
+  └─ Deployment guides
+  └─ Troubleshooting
+  └─ CHANGELOG
+```
+
+---
+
+## 🔄 Version Control
+
+### Commit Messages for Docs
+
+```bash
+# Good commit messages
+docs: update PROJECT_CONTEXT with new auth flow
+docs(logs): add session completion summary
+docs(api): document new Edge Function endpoints
+
+# Bad commit messages
+updated docs
+fixes
+documentation
+```
+
+### Documentation Branches
+
+- Keep documentation in same branch as code
+- Review documentation changes in PRs
+- Tag documentation versions with releases
+
+---
+
+**Last Updated:** 2025-01-10  
+**Maintained By:** Project Team  
+**Review Frequency:** Monthly
+

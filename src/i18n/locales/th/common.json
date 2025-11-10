@@ -1,0 +1,79 @@
+{
+  "app_name": "Core ERP",
+  "navigation": {
+    "dashboard": "แดชบอร์ด",
+    "users": "ผู้ใช้",
+    "roles": "บทบาท",
+    "permissions": "สิทธิ์",
+    "settings": "ตั้งค่า"
+  },
+  "actions": {
+    "create": "สร้าง",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "close": "ปิด",
+    "back": "กลับ",
+    "next": "ถัดไป",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "export": "ส่งออก",
+    "import": "นำเข้า",
+    "refresh": "รีเฟรช",
+    "view": "ดู",
+    "add": "เพิ่ม",
+    "remove": "ลบออก",
+    "update": "อัปเดต",
+    "submit": "ส่ง"
+  },
+  "status": {
+    "active": "ใช้งาน",
+    "inactive": "ไม่ใช้งาน",
+    "enabled": "เปิดใช้งาน",
+    "disabled": "ปิดใช้งาน",
+    "loading": "กำลังโหลด...",
+    "success": "สำเร็จ",
+    "error": "ผิดพลาด",
+    "warning": "คำเตือน",
+    "info": "ข้อมูล"
+  },
+  "common_fields": {
+    "name": "ชื่อ",
+    "email": "อีเมล",
+    "description": "คำอธิบาย",
+    "status": "สถานะ",
+    "created_at": "สร้างเมื่อ",
+    "updated_at": "แก้ไขเมื่อ",
+    "created_by": "สร้างโดย",
+    "updated_by": "แก้ไขโดย",
+    "actions": "การดำเนินการ"
+  },
+  "messages": {
+    "confirm_delete": "คุณแน่ใจหรือว่าต้องการลบรายการนี้?",
+    "confirm_delete_title": "ยืนยันการลบ",
+    "cannot_undo": "การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+    "no_data": "ไม่มีข้อมูล",
+    "loading_data": "กำลังโหลดข้อมูล...",
+    "save_success": "บันทึกสำเร็จ",
+    "save_error": "บันทึกไม่สำเร็จ",
+    "delete_success": "ลบสำเร็จ",
+    "delete_error": "ลบไม่สำเร็จ",
+    "update_success": "อัปเดตสำเร็จ",
+    "update_error": "อัปเดตไม่สำเร็จ",
+    "required_field": "กรุณากรอกข้อมูลในช่องนี้",
+    "invalid_email": "รูปแบบอีเมลไม่ถูกต้อง",
+    "unauthorized": "คุณไม่มีสิทธิ์ในการดำเนินการนี้",
+    "session_expired": "เซสชันของคุณหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่"
+  },
+  "pagination": {
+    "showing": "แสดง",
+    "to": "ถึง",
+    "of": "จาก",
+    "entries": "รายการ",
+    "previous": "ก่อนหน้า",
+    "next": "ถัดไป"
+  }
+}
+

@@ -1,0 +1,340 @@
+# Core ERP - Cursor AI Rules & Context
+
+## Project Overview
+
+This is **Core ERP** - a foundational Enterprise Resource Planning system with user management, role-based access control (RBAC), and granular permissions.
+
+### Key Architecture Points
+
+1. **Per-Customer Deployment Model**: Each customer gets their own deployment + Supabase instance. Complete data isolation.
+
+2. **Tech Stack**:
+   - Frontend: React 18 + TypeScript + Vite
+   - UI: Tailwind CSS + shadcn/ui (48 components)
+   - Backend: Supabase (PostgreSQL + Auth + Edge Functions)
+   - State: React Query + Context API
+   - Forms: React Hook Form + Zod
+
+3. **Database Design**:
+   - users (profiles)
+   - roles (hierarchical, with levels 0-100)
+   - permissions (granular: resource:action format)
+   - user_roles (junction: users ↔ roles, many-to-many)
+   - role_permissions (junction: roles ↔ permissions)
+   - audit_log (all important actions)
+
+4. **Permission System**:
+   - Users have multiple roles
+   - Roles have multiple permissions
+   - User's effective permissions = union of all role permissions
+   - Format: `resource:action` (e.g., `users:create`, `roles:edit`)
+
+5. **Security**:
+   - Row Level Security (RLS) on all tables
+   - Magic link authentication (passwordless)
+   - Edge Functions for admin operations (use service_role key)
+   - Permission checks in both UI and server
+
+6. **Current Supabase Project**:
+   - ID: gtktmxrshikgehfdopaa
+   - URL: https://gtktmxrshikgehfdopaa.supabase.co
+   - Region: ap-southeast-1 (Thailand)
+   - Dev Port: 5175
+
+## Code Patterns to Follow
+
+### 1. Data Fetching with React Query
+
+```typescript
+// Query hook
+export function useUsers() {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*, roles:user_roles(role:roles(*))')
+      if (error) throw error
+      return data
+    }
+  })
+}
+
+// Mutation hook
+export function useCreateUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (userData) => {
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: userData
+      })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('User created')
+    }
+  })
+}
+```
+
+### 2. Permission Checking
+
+```typescript
+// In components
+const { hasPermission } = useAuth()
+
+// Conditional rendering
+{hasPermission('users:create') && <Button>Add User</Button>}
+
+// Route protection
+<ProtectedRoute requiredPermission="users:view">
+  <UserList />
+</ProtectedRoute>
+```
+
+### 3. Form Validation with Zod
+
+```typescript
+const schema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email'),
+  role_ids: z.array(z.string()).min(1, 'Select at least one role')
+})
+
+const form = useForm({
+  resolver: zodResolver(schema),
+  defaultValues: { name: '', email: '', role_ids: [] }
+})
+```
+
+### 4. Edge Functions Structure
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+import { corsHeaders } from '../_shared/cors.ts'
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL'),
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    )
+    
+    const { data: { user } } = await supabase.auth.getUser(token)
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Your logic here
+    
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+})
+```
+
+## Naming Conventions
+
+- **Files**: 
+  - Components: PascalCase (UserList.tsx, AppLayout.tsx)
+  - Hooks: camelCase with "use" prefix (useUsers.ts, useAuth.ts)
+  - Utils: camelCase (utils.ts, api.ts)
+
+- **Database**:
+  - Tables: lowercase, plural (users, roles, permissions)
+  - Columns: snake_case (auth_user_id, is_active, created_at)
+  - Permissions: resource:action (users:create, roles:view)
+
+- **Components**:
+  - UI components: lowercase (<button>, <card>)
+  - Page components: PascalCase (<UserList>, <Dashboard>)
+
+## Important Guidelines
+
+### When Adding Features
+
+1. **Database First**: Create migration SQL file
+2. **Edge Function**: Create if needs admin/complex logic
+3. **Types**: Update src/types/database.ts
+4. **Hooks**: Create React Query hook
+5. **UI**: Build using shadcn/ui components
+6. **Permissions**: Add permission check if sensitive
+7. **Audit**: Log important actions to audit_log
+
+### Security Rules
+
+- ✅ Always check permissions before sensitive operations
+- ✅ Use Edge Functions for admin operations (bypass RLS with service_role)
+- ✅ Validate input with Zod schemas
+- ✅ Log important actions to audit_log
+- ✅ Never expose service_role key to client
+- ✅ Client-side permission checks are for UX only (real security is RLS + Edge Functions)
+
+### UI/UX Standards
+
+- ✅ Always provide loading states (LoadingState component)
+- ✅ Show empty states (EmptyState component)
+- ✅ Confirm destructive actions (Dialog with confirmation)
+- ✅ Show toast notifications for success/error
+- ✅ Use consistent page headers (PageHeader component)
+- ✅ Make tables sortable and filterable
+- ✅ Implement pagination for large lists
+
+### Database Patterns
+
+- ✅ Use RLS on all tables
+- ✅ Use transactions for multi-step operations
+- ✅ CASCADE delete on foreign keys when appropriate
+- ✅ Index frequently queried columns
+- ✅ Use UUIDs for primary keys
+- ✅ Include created_at, updated_at timestamps
+
+## File Structure Quick Reference
+
+```
+src/
+├── components/
+│   ├── ui/                 # shadcn/ui components (don't modify)
+│   ├── AppLayout.tsx       # Main layout with sidebar
+│   ├── ProtectedRoute.tsx  # Auth guard
+│   ├── PageHeader.tsx      # Consistent headers
+│   ├── LoadingState.tsx    # Loading spinner
+│   └── EmptyState.tsx      # Empty state UI
+├── pages/
+│   ├── Login.tsx          # Magic link auth
+│   ├── Dashboard.tsx      # Overview page
+│   ├── Users/            # User management pages
+│   ├── Roles/            # Role management pages
+│   └── Permissions/      # Permission management
+├── contexts/
+│   └── AuthContext.tsx   # Auth state + permissions
+├── hooks/
+│   ├── useAuth.ts        # Access auth context
+│   ├── useUsers.ts       # User CRUD
+│   ├── useRoles.ts       # Role CRUD
+│   └── usePermissions.ts # Permission queries
+├── lib/
+│   ├── supabase.ts       # Supabase client
+│   ├── utils.ts          # Utility functions
+│   └── api.ts            # Edge Function helpers
+└── types/
+    └── database.ts       # DB TypeScript types
+
+supabase/
+├── functions/            # Edge Functions (Deno)
+│   ├── get-user-permissions/
+│   ├── create-user/
+│   ├── update-user/
+│   └── _shared/         # Shared utilities
+└── migrations/          # SQL migrations
+```
+
+## Common Operations
+
+### Add New Permission
+
+1. SQL: `INSERT INTO permissions (code, name, description, category) VALUES (...)`
+2. Assign to role: Via UI or SQL into role_permissions
+3. Use in code: `{hasPermission('new:permission') && ...}`
+
+### Create New Page
+
+1. Create component in src/pages/
+2. Add route in src/App.tsx
+3. Wrap with ProtectedRoute if needs auth/permission
+4. Add menu item in AppLayout.tsx (with permission check)
+
+### Create Edge Function
+
+1. Create folder: supabase/functions/function-name/
+2. Create index.ts with Deno.serve
+3. Deploy: `supabase functions deploy function-name`
+4. Call from frontend: `supabase.functions.invoke('function-name', { body })`
+
+### Add Database Table
+
+1. Create migration: supabase/migrations/YYYYMMDDHHMMSS_name.sql
+2. Write CREATE TABLE with RLS policies
+3. Apply migration via Supabase Dashboard or CLI
+4. Update TypeScript types
+
+## Documentation
+
+- **PROJECT_CONTEXT.md** - COMPREHENSIVE architecture guide (READ THIS FIRST)
+- **START_GUIDE.md** - Quick start checklist
+- **README.md** - Project overview and setup
+- **../PLAN_CORE_ERP.md** - Full implementation plan (in workspace root)
+
+## Edge Cases to Remember
+
+- Users can have multiple roles
+- Users can be deactivated (is_active=false) but not deleted
+- System roles (is_system=true) cannot be deleted
+- Permission codes must be unique
+- Role levels affect hierarchy (higher = more authority)
+- Audit log entries should include user_id, action, resource_type, resource_id
+- Magic link auth requires email verification setup in Supabase
+
+## Default System Data
+
+**Roles**:
+- superadmin (level 100) - Full access
+- admin (level 50) - Administrative access
+- user (level 10) - Standard access
+
+**Permission Categories**:
+- users - User management
+- roles - Role management
+- permissions - Permission management
+- system - System configuration
+
+**Default Permissions**: 13 total
+- users:view, users:create, users:edit, users:delete, users:manage_roles
+- roles:view, roles:create, roles:edit, roles:delete
+- permissions:view, permissions:assign
+- system:configure, system:audit
+
+## When Working on This Project
+
+1. **Read PROJECT_CONTEXT.md** - Comprehensive guide with everything you need
+2. **Follow existing patterns** - Check how similar features are implemented
+3. **Security first** - Always validate, check permissions, log actions
+4. **Type safety** - Use TypeScript properly, define interfaces
+5. **User experience** - Loading states, error messages, confirmations
+6. **Consistency** - Use existing components, follow naming conventions
+7. **Document changes** - Update PROJECT_CONTEXT.md if architecture changes
+
+## Quick Commands
+
+```bash
+# Development
+npm run dev          # Start dev server (localhost:5175)
+npm run build        # Build for production
+npm run lint         # Run linter
+
+# Supabase (if CLI installed)
+supabase functions deploy <name>  # Deploy Edge Function
+supabase db push     # Apply migrations
+supabase gen types typescript --project-id gtktmxrshikgehfdopaa > src/types/database.ts
+```
+
+---
+
+**Remember**: This is a per-customer deployment. Each customer gets their own instance with complete isolation. Customization per customer is expected and encouraged.
+

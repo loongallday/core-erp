@@ -1,0 +1,816 @@
+---
+title: Core ERP Project Rules
+description: Context and guidelines for the Core ERP foundation system
+tags: [react, typescript, supabase, erp, rbac]
+---
+
+# Core ERP - Project Context & Rules
+
+## 🎯 Project Identity
+
+**Core ERP** is a foundational Enterprise Resource Planning system with:
+- User management with magic link authentication
+- Role-based access control (RBAC) with hierarchical roles
+- Granular permission system (resource:action format)
+- Audit logging for all important actions
+- Per-customer deployment model (each customer = separate deployment + Supabase)
+
+## 📊 Current Status
+
+- **Status**: ✅ Core Complete | 🔌 Plugin System Ready | 🚀 Production Ready
+- **Version**: 1.0.0
+- **Supabase Project**: gtktmxrshikgehfdopaa
+- **Dev Port**: 5175
+- **Region**: ap-southeast-1 (Thailand)
+- **New Features**: Plugin System, Localization, Responsive UI
+
+## 🏗️ Technology Stack
+
+### Frontend
+- React 18 + TypeScript
+- Vite (build tool)
+- Tailwind CSS + shadcn/ui (48 components)
+- React Router v6
+- TanStack React Query (server state)
+- React Hook Form + Zod (forms)
+
+### Backend
+- Supabase PostgreSQL
+- Supabase Auth (magic link)
+- Supabase Edge Functions (Deno)
+- Row Level Security (RLS)
+
+### Plugin System (NEW)
+- Private NPM packages
+- Core-controlled configuration
+- Dynamic route/menu registration
+- Event bus & hook system
+- Full TypeScript support
+
+## 🗄️ Database Architecture
+
+### Core Tables
+```
+users              - User profiles (name, email, phone, avatar, status)
+roles              - Role definitions (code, name, level, is_system)
+permissions        - Permission definitions (code: resource:action)
+user_roles         - Junction: Users ↔ Roles (many-to-many)
+role_permissions   - Junction: Roles ↔ Permissions (many-to-many)
+audit_log          - Action tracking (user_id, action, resource, changes)
+```
+
+### Permission Resolution Flow
+```
+User → user_roles → roles → role_permissions → permissions
+```
+
+**Key Point**: Users can have multiple roles. Effective permissions = union of all role permissions.
+
+### Default System Roles
+- `superadmin` (level 100) - Full system access, cannot be deleted
+- `admin` (level 50) - Administrative access
+- `user` (level 10) - Standard user access
+
+### Permission Format
+`resource:action` pattern:
+- `users:view`, `users:create`, `users:edit`, `users:delete`, `users:manage_roles`
+- `roles:view`, `roles:create`, `roles:edit`, `roles:delete`
+- `permissions:view`, `permissions:assign`
+- `system:configure`, `system:audit`
+
+## 🔐 Security Model
+
+### Authentication
+- Magic link (passwordless) via Supabase Auth
+- Session-based with automatic token refresh
+- AuthContext provides global auth state
+
+### Authorization
+1. **RLS on all tables** - Database-level security
+2. **Edge Functions for admin ops** - Use service_role key to bypass RLS
+3. **Permission checks** - Both client (UX) and server (security)
+4. **Audit logging** - Track all sensitive operations
+
+### Security Rules
+- ✅ Never expose service_role key to client
+- ✅ Always validate input with Zod schemas
+- ✅ Check permissions before sensitive operations
+- ✅ Log important actions to audit_log
+- ✅ Client-side checks are UX only (real security = RLS + Edge Functions)
+
+## 📁 File Structure
+
+```
+src/
+├── components/
+│   ├── ui/                    # 48 shadcn/ui components (don't modify directly)
+│   ├── AppLayout.tsx          # Main layout with sidebar navigation
+│   ├── ProtectedRoute.tsx     # Auth & permission guard
+│   ├── PageHeader.tsx         # Consistent page headers
+│   ├── LoadingState.tsx       # Loading UI
+│   └── EmptyState.tsx         # Empty state UI
+├── pages/
+│   ├── Login.tsx              # Magic link authentication
+│   ├── Dashboard.tsx          # Overview page (stats, quick actions)
+│   ├── Users.tsx              # User management (list, create, edit)
+│   ├── Roles.tsx              # Role management
+│   └── Permissions.tsx        # Permission assignment
+├── contexts/
+│   └── AuthContext.tsx        # Global auth state + user permissions
+├── hooks/
+│   ├── useAuth.ts             # Access auth context
+│   ├── useUsers.ts            # User CRUD with React Query
+│   ├── useRoles.ts            # Role CRUD
+│   └── usePermissions.ts      # Permission queries
+├── lib/
+│   ├── supabase.ts            # Supabase client initialization
+│   ├── utils.ts               # Utility functions (cn, etc.)
+│   └── api.ts                 # Edge Function call helpers
+└── types/
+    └── database.ts            # TypeScript types for DB tables
+
+supabase/
+├── functions/                 # Edge Functions (Deno runtime)
+│   ├── get-user-permissions/  # Calculate user's permissions
+│   ├── create-user/           # Create user + assign roles
+│   ├── update-user/           # Update user info
+│   └── _shared/               # Shared utilities (CORS, auth)
+└── migrations/                # SQL migration files
+```
+
+## 📱 Responsive Design (MANDATORY)
+
+### Overview
+All UI must be fully responsive and work seamlessly across devices (320px - 1920px+). We enforce responsive design through:
+1. **Fluid typography system** - Text scales automatically via clamp()
+2. **Responsive base components** - Pre-built components that enforce responsive patterns
+3. **Touch-friendly targets** - Minimum 44x44px for all interactive elements
+4. **Mobile-first approach** - Design for mobile, enhance for desktop
+
+### Responsive Components (USE THESE)
+
+**Never use raw HTML/CSS for layout. Always use these components:**
+
+#### PageContainer
+Standardized container with responsive padding.
+```typescript
+import { PageContainer } from '@/components/responsive/PageContainer'
+
+<PageContainer className="py-6">
+  {/* Content */}
+</PageContainer>
+```
+
+#### PageHeader
+Automatically stacking page headers.
+```typescript
+import { PageHeader } from '@/components/responsive/PageHeader'
+
+<PageHeader
+  title="Page Title"
+  subtitle="Description"
+  actions={<ResponsiveButton>Action</ResponsiveButton>}
+/>
+```
+
+#### ResponsiveGrid
+Auto-adjusting grid based on space.
+```typescript
+import { ResponsiveGrid } from '@/components/responsive/ResponsiveGrid'
+
+<ResponsiveGrid minWidth="280px" gap={4}>
+  <Card>...</Card>
+  <Card>...</Card>
+</ResponsiveGrid>
+```
+
+#### ResponsiveStack
+Flex that stacks on mobile.
+```typescript
+import { ResponsiveStack } from '@/components/responsive/ResponsiveStack'
+
+<ResponsiveStack direction="row" spacing={3}>
+  <Button>Action 1</Button>
+  <Button>Action 2</Button>
+</ResponsiveStack>
+```
+
+#### ResponsiveButton
+Full-width on mobile, auto on desktop.
+```typescript
+import { ResponsiveButton } from '@/components/responsive/ResponsiveButton'
+
+<ResponsiveButton onClick={handleClick}>Submit</ResponsiveButton>
+```
+
+#### ResponsiveTable
+Table with horizontal scroll and sticky first column.
+```typescript
+import { ResponsiveTable } from '@/components/responsive/ResponsiveTable'
+
+<ResponsiveTable minWidth="640px">
+  <TableHeader>
+    <TableRow>
+      <TableHead className="sticky left-0 bg-card z-10">Name</TableHead>
+      <TableHead>Email</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>...</TableBody>
+</ResponsiveTable>
+```
+
+### Typography Rules
+
+**Fluid typography is automatic. Use these classes:**
+- Page titles: `text-2xl md:text-3xl` (extra emphasis only)
+- Section headers: `text-xl`
+- Card titles: `text-lg`
+- Body text: `text-base` (automatically fluid 16px-18px)
+- Labels/captions: `text-sm`
+- Metadata: `text-xs`
+
+**Never use fixed pixel sizes** - Trust the fluid system configured in Tailwind.
+
+### Touch Targets
+
+All interactive elements must be at least 44x44px:
+```typescript
+// Use touch-target utility
+<Button className="touch-target">Click</Button>
+
+// Or ResponsiveButton (includes automatically)
+<ResponsiveButton>Click</ResponsiveButton>
+```
+
+### Mobile Navigation
+
+Already implemented in `AppLayout.tsx`:
+- Mobile: Hamburger menu with drawer (Sheet component)
+- Desktop: Fixed sidebar
+- Automatic responsive behavior
+
+### Prohibited Patterns
+
+❌ **Never do:**
+```typescript
+// Fixed widths
+<div style={{ width: '800px' }}>...</div>
+<div className="w-[800px]">...</div>
+
+// Non-responsive flex
+<div className="flex">...</div> // without mobile consideration
+
+// Hardcoded text sizes
+<h1 style={{ fontSize: '32px' }}>...</h1>
+<p className="text-[16px]">...</p>
+
+// Tables without wrapper
+<Table>...</Table> // Must use ResponsiveTable
+
+// Small touch targets
+<button className="p-1">×</button>
+```
+
+✅ **Always do:**
+```typescript
+// Responsive widths
+<PageContainer>...</PageContainer>
+<div className="max-w-4xl">...</div>
+
+// Responsive flex
+<ResponsiveStack direction="row">...</ResponsiveStack>
+
+// Fluid text
+<h1 className="text-3xl">...</h1>
+<p className="text-base">...</p>
+
+// Wrapped tables
+<ResponsiveTable>...</ResponsiveTable>
+
+// Touch targets
+<Button className="touch-target">×</Button>
+```
+
+### Testing Requirements
+
+Every feature must be tested at:
+- 320px (small mobile)
+- 375px (standard mobile)
+- 768px (tablet)
+- 1024px (laptop)
+- 1440px (desktop)
+
+### Resources
+
+- **docs/RESPONSIVE_GUIDELINES.md** - Complete responsive design guide
+- **docs/RESPONSIVE_ESLINT_RULES.md** - ESLint rules for responsiveness
+
+## 💻 Code Patterns
+
+### 1. Data Fetching (React Query)
+
+```typescript
+// Query hook for reading data
+export function useUsers() {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*, roles:user_roles(role:roles(*))')
+        .order('name')
+      if (error) throw error
+      return data
+    }
+  })
+}
+
+// Mutation hook for creating/updating
+export function useCreateUser() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (userData) => {
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: userData
+      })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('User created successfully')
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    }
+  })
+}
+
+// Usage in component
+function UserList() {
+  const { data: users, isLoading } = useUsers()
+  const createUser = useCreateUser()
+  
+  if (isLoading) return <LoadingState />
+  if (!users?.length) return <EmptyState />
+  
+  return <div>{users.map(user => <UserCard key={user.id} user={user} />)}</div>
+}
+```
+
+### 2. Permission Checking
+
+```typescript
+// In components
+const { hasPermission } = useAuth()
+
+// Conditional rendering
+{hasPermission('users:create') && (
+  <Button onClick={handleCreate}>Add User</Button>
+)}
+
+// Disabled state
+<Button 
+  onClick={handleDelete}
+  disabled={!hasPermission('users:delete')}
+>
+  Delete User
+</Button>
+
+// Route protection
+<Route path="/users" element={
+  <ProtectedRoute requiredPermission="users:view">
+    <Users />
+  </ProtectedRoute>
+} />
+```
+
+### 3. Form Validation (Zod + React Hook Form)
+
+```typescript
+// Define schema
+const userSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
+  role_ids: z.array(z.string()).min(1, 'Select at least one role'),
+  is_active: z.boolean().default(true)
+})
+
+type UserFormData = z.infer<typeof userSchema>
+
+// Initialize form
+const form = useForm<UserFormData>({
+  resolver: zodResolver(userSchema),
+  defaultValues: {
+    name: '',
+    email: '',
+    phone: '',
+    role_ids: [],
+    is_active: true
+  }
+})
+
+// Submit handler
+const onSubmit = async (data: UserFormData) => {
+  try {
+    await createUser.mutateAsync(data)
+    toast.success('User created')
+    navigate('/users')
+  } catch (error) {
+    toast.error(error.message)
+  }
+}
+
+// Render
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onSubmit)}>
+    <FormField
+      control={form.control}
+      name="name"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Name</FormLabel>
+          <FormControl>
+            <Input {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+    <Button type="submit">Create User</Button>
+  </form>
+</Form>
+```
+
+### 4. Edge Function Structure (Deno)
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+import { corsHeaders } from '../_shared/cors.ts'
+
+Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    // Get auth token
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+    
+    // Create admin client (service_role key)
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+    
+    // Verify user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Parse request body
+    const body = await req.json()
+    
+    // Your business logic here
+    // Use supabase client with service_role to bypass RLS
+    
+    // Log to audit_log
+    await supabase.from('audit_log').insert({
+      user_id: user.id,
+      action: 'action_name',
+      resource_type: 'resource',
+      resource_id: 'id',
+      changes: body
+    })
+    
+    return new Response(
+      JSON.stringify({ success: true, data: result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+    
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
+  }
+})
+```
+
+## 🎯 Naming Conventions
+
+### Files & Components
+- **Components**: PascalCase (`UserList.tsx`, `AppLayout.tsx`)
+- **Hooks**: camelCase with `use` prefix (`useUsers.ts`, `useAuth.ts`)
+- **Utils**: camelCase (`utils.ts`, `api.ts`)
+- **Pages**: PascalCase (`Dashboard.tsx`, `Users.tsx`)
+
+### Database
+- **Tables**: lowercase, plural (`users`, `roles`, `permissions`)
+- **Columns**: snake_case (`auth_user_id`, `is_active`, `created_at`)
+- **Indexes**: `idx_{table}_{column}` (`idx_users_email`)
+- **Policies**: Descriptive (`Users are viewable by authenticated users`)
+
+### Permissions
+- **Format**: `resource:action`
+- **Examples**: `users:create`, `roles:edit`, `permissions:assign`
+- **Categories**: users, roles, permissions, system
+
+### TypeScript
+- **Interfaces**: PascalCase (`User`, `Role`, `Permission`)
+- **Types**: PascalCase (`UserFormData`, `AuthContextType`)
+- **Enums**: PascalCase with UPPER_CASE values
+
+## ✅ Development Guidelines
+
+### When Adding Features
+
+1. **Database First**
+   - Create migration in `supabase/migrations/`
+   - Name: `YYYYMMDDHHMMSS_description.sql`
+   - Include RLS policies
+
+2. **Edge Function** (if needed)
+   - Create in `supabase/functions/function-name/`
+   - Use service_role for admin operations
+   - Include permission checks
+   - Log to audit_log
+
+3. **TypeScript Types**
+   - Update `src/types/database.ts`
+   - Can generate: `supabase gen types typescript`
+
+4. **React Query Hooks**
+   - Create in `src/hooks/`
+   - Use `useQuery` for reads
+   - Use `useMutation` for writes
+   - Invalidate queries on success
+
+5. **UI Components**
+   - Create in `src/pages/` or `src/components/`
+   - Use shadcn/ui components
+   - Add loading/empty states
+   - Include permission checks
+
+6. **Permissions**
+   - Add to `permissions` table
+   - Assign to appropriate roles
+   - Check in UI with `hasPermission()`
+   - Verify in Edge Functions
+
+### UI/UX Standards
+
+✅ **Always provide:**
+- Loading states (`<LoadingState />` or skeleton)
+- Empty states (`<EmptyState />` with icon and message)
+- Error messages (toast notifications)
+- Success feedback (toast notifications)
+- Confirmation dialogs for destructive actions
+
+✅ **Make interactive elements:**
+- Tables sortable and filterable
+- Lists paginated (if > 20 items)
+- Forms validated with clear error messages
+- Buttons disabled during loading
+- All touch targets minimum 44x44px (use `touch-target` class)
+
+✅ **Maintain consistency:**
+- Use `<PageHeader>` for all pages (responsive component)
+- Use `<PageContainer>` for page content (responsive padding)
+- Use `<ResponsiveGrid>` for grid layouts
+- Use `<ResponsiveStack>` for flex layouts that should stack
+- Use `<ResponsiveTable>` for all data tables
+- Follow existing component patterns
+- Use theme colors from Tailwind config
+
+✅ **Ensure responsive design:**
+- Use responsive base components (PageContainer, PageHeader, etc.)
+- Test at multiple breakpoints (320px, 768px, 1024px)
+- Ensure text is readable on all screen sizes
+- Verify touch targets are adequate
+- Check horizontal scroll on tables
+
+### Testing Checklist
+
+Before considering a feature complete:
+
+- [ ] Works with no permissions (graceful denial)
+- [ ] Works with required permissions (success path)
+- [ ] Works with partial permissions (partial access)
+- [ ] Loading states display correctly
+- [ ] Empty states display correctly
+- [ ] Error messages are clear and helpful
+- [ ] Success messages appear
+- [ ] RLS policies prevent unauthorized access
+- [ ] Audit log entries created for important actions
+- [ ] TypeScript has no errors
+- [ ] No console errors or warnings
+- [ ] **Responsive at 320px (mobile)**
+- [ ] **Responsive at 768px (tablet)**
+- [ ] **Responsive at 1024px+ (desktop)**
+- [ ] **All touch targets ≥ 44x44px**
+- [ ] **Tables scroll horizontally on mobile**
+- [ ] **Text readable at all sizes**
+
+## 🚫 Common Pitfalls to Avoid
+
+❌ **Don't**:
+- Expose service_role key to client
+- Skip permission checks in Edge Functions
+- Forget to log important actions
+- Modify shadcn/ui components directly (extend instead)
+- Use direct database mutations without Edge Functions for admin ops
+- Skip input validation
+- Forget loading/empty/error states
+- Hardcode permission strings (use constants or types)
+- **Use fixed pixel widths (use max-width instead)**
+- **Create non-responsive layouts (use responsive components)**
+- **Use hardcoded text sizes (use fluid typography)**
+- **Create tables without ResponsiveTable wrapper**
+- **Make touch targets smaller than 44x44px**
+
+✅ **Do**:
+- Always check permissions on both client and server
+- Use Edge Functions for sensitive operations
+- Log to audit_log for compliance
+- Handle all async states (loading, error, success)
+- Validate all user input with Zod
+- Use TypeScript types properly
+- Follow existing code patterns
+- Test with different permission levels
+- **Use PageContainer for page content**
+- **Use PageHeader for page headers**
+- **Use ResponsiveGrid for grid layouts**
+- **Use ResponsiveTable for all tables**
+- **Test at mobile, tablet, and desktop breakpoints**
+- **Ensure all touch targets are ≥ 44x44px**
+
+## 🎓 Key Concepts
+
+### Users vs Roles vs Permissions
+
+**Users**: People who use the system
+- Have profile info (name, email, phone)
+- Can be active or inactive
+- Have one or more roles
+
+**Roles**: Job functions or responsibility levels  
+- Examples: "Manager", "Accountant", "Admin"
+- Have hierarchy level (0-100)
+- Collect related permissions
+- Can be assigned to multiple users
+- System roles (is_system=true) cannot be deleted
+
+**Permissions**: Specific actions
+- Very granular (e.g., "Create users", "View reports")
+- Assigned to roles (not directly to users)
+- User's effective permissions = union of all role permissions
+
+### Permission Resolution
+
+```
+1. Get user's roles from user_roles table
+2. Get all permissions for those roles from role_permissions
+3. Join with permissions table to get permission codes
+4. Deduplicate (user might get same permission from multiple roles)
+5. Return unique array of permission codes
+```
+
+### Per-Customer Deployment
+
+Each customer gets:
+- Own codebase instance (can be customized)
+- Own Supabase project (complete data isolation)
+- Own environment variables
+- Own domain (e.g., customer-a.yourdomain.com)
+
+**Why?**
+- Complete data isolation (security)
+- Independent scaling
+- Customer-specific customization
+- No "noisy neighbor" problems
+
+## 🔌 Plugin System (NEW - IMPORTANT)
+
+### Overview
+Core ERP now includes a comprehensive plugin system for modular feature development.
+
+**Key Points:**
+- Plugins are **private NPM packages** (`@core-erp/plugin-{name}`)
+- **Core controls everything** via `plugins.config.ts`
+- Automatic integration (routes, menus, permissions, i18n)
+- Per-customer customization without code changes
+
+### Adding a Plugin (Simple!)
+
+```bash
+# 1. Install
+npm install @core-erp/plugin-inventory
+
+# 2. Configure in plugins.config.ts
+{ package: '@core-erp/plugin-inventory', enabled: true }
+
+# 3. Restart
+npm run dev
+```
+
+### Creating a Plugin
+
+See complete guide: `docs/plugins/PLUGIN_DEVELOPMENT_GUIDE.md`
+
+**Basic structure:**
+```typescript
+// Plugin manifest
+export const plugin: PluginManifest = {
+  id: 'my-plugin',
+  name: 'My Plugin',
+  version: '1.0.0',
+  coreVersion: '>=1.0.0',
+  frontend: {
+    routes: () => import('./frontend/routes'),
+    menu: () => import('./frontend/menu'),
+  },
+  permissions: () => import('./permissions/definitions.json'),
+  translations: { namespaces: ['my-plugin'], defaults: {...} },
+}
+```
+
+### Plugin Documentation
+
+**Essential docs in `docs/plugins/`:**
+- README.md - Complete index
+- PLUGIN_MANAGEMENT_QUICK_START.md - Add/remove plugins
+- PLUGIN_DEVELOPMENT_GUIDE.md - Create plugins
+- I18N_ARCHITECTURE_EXPLAINED.md - Translation system
+
+**When working with plugins:**
+- ✅ All configuration in `plugins.config.ts` (never modify plugin code)
+- ✅ Core can override translations, config, UI, permissions
+- ✅ Plugins use same patterns as core (React Query, Zod, shadcn/ui)
+- ✅ Full TypeScript support
+- ✅ Automatic permission integration
+
+## 📚 Documentation Files
+
+- **DOCUMENTATION.md** - Master documentation index (START HERE)
+- **PROJECT_CONTEXT.md** - Comprehensive architecture guide (1300+ lines)
+- **README.md** - Quick start and overview
+- **plugins.config.ts** - Plugin configuration (central control)
+- **docs/plugins/** - Complete plugin system documentation
+- **docs/guides/** - Core feature guides (localization, responsive, etc.)
+- **.cursor/rules/** - AI assistant rules
+
+## 🔗 Quick Reference Links
+
+### Supabase Project
+- Dashboard: https://app.supabase.com/project/gtktmxrshikgehfdopaa
+- URL: https://gtktmxrshikgehfdopaa.supabase.co
+
+### Documentation
+- Supabase: https://supabase.com/docs
+- React Query: https://tanstack.com/query/latest
+- shadcn/ui: https://ui.shadcn.com
+- Zod: https://zod.dev
+
+## 💡 Quick Commands
+
+```bash
+# Development
+npm run dev          # Start dev server (localhost:5175)
+npm run build        # Build for production
+npm run lint         # Run ESLint
+npm run preview      # Preview production build
+
+# Supabase (if CLI installed)
+supabase functions deploy <name>              # Deploy Edge Function
+supabase db push                              # Apply migrations
+supabase gen types typescript > src/types/db.ts  # Generate types
+```
+
+## 🎯 When Working on This Project
+
+1. ✅ Read PROJECT_CONTEXT.md for deep understanding
+2. ✅ Read docs/RESPONSIVE_GUIDELINES.md for responsive design
+3. ✅ Follow existing code patterns
+4. ✅ Security first (permissions, validation, audit)
+5. ✅ Type safety (use TypeScript properly)
+6. ✅ **Responsive design (use responsive components)**
+7. ✅ UX matters (loading, empty, error states)
+8. ✅ Test with different permission levels
+9. ✅ **Test at mobile, tablet, and desktop sizes**
+10. ✅ Document significant changes
+11. ✅ Keep it consistent with existing code
+
+---
+
+**Remember**: This is a per-customer deployment model. Customization is expected. Make it work for the customer's specific needs while maintaining the core architecture.
