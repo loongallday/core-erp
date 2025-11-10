@@ -75,6 +75,24 @@ Quick SQL scripts for common database operations.
 
 **Time**: ~5 seconds
 
+### 5. Reset Plugin Database
+
+**File**: `core-leave/PLUGIN_RESET.sql`
+
+**Use when**: Testing plugin installation or cleaning plugin data
+
+**Warning**: ⚠️ Deletes ALL plugin data!
+
+**What it does**:
+- Drops all plugin tables (leave_types, leave_balances, leave_requests, leave_calendar_cache)
+- Drops all plugin functions and triggers
+- Drops all plugin sequences
+- Removes plugin permissions from roles
+- Removes plugin permissions from database
+
+**After reset**:
+1. Run `core-leave/PLUGIN_COMPLETE.sql` to set up plugin again
+
 ---
 
 ## 📊 Inspection Scripts
@@ -217,6 +235,8 @@ ON CONFLICT DO NOTHING;
 | ASSIGN_ADMIN_ROLE.sql | Promote user | ✅ Safe | Adds role to existing user |
 | CORE_COMPLETE.sql | Fresh setup | ✅ Safe | Idempotent (can rerun safely) |
 | RESET_DATABASE.sql | Delete all data | ⚠️ DANGEROUS | Drops everything, no backups! |
+| core-leave/PLUGIN_RESET.sql | Reset plugin | ⚠️ DANGEROUS | Drops all plugin data only |
+| core-leave/PLUGIN_COMPLETE.sql | Plugin setup | ✅ Safe | Idempotent (can rerun safely) |
 
 ---
 
