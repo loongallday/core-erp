@@ -1,298 +1,125 @@
-# Supabase - Core ERP Backend
+# Supabase Integration
 
-This directory contains all Supabase-related configurations, migrations, and Edge Functions for the Core ERP system.
-
-## 📁 Directory Structure
-
-```
-supabase/
-├── migrations/                          # Database migrations (SQL)
-│   ├── 20250110000001_create_core_tables.sql
-│   ├── 20250110000002_seed_roles_and_permissions.sql
-│   ├── 20250110000003_add_user_locale.sql
-│   ├── 20250110000004_create_translations_table.sql
-│   └── 20250110000005_seed_translations.sql
-├── functions/                           # Edge Functions (Deno)
-│   ├── _shared/
-│   │   └── cors.ts                     # CORS configuration
-│   ├── get-user-permissions/
-│   │   └── index.ts                    # Calculate user permissions
-│   ├── create-user/
-│   │   └── index.ts                    # Create user with auth + profile
-│   ├── update-user/
-│   │   └── index.ts                    # Update user profile
-│   └── assign-roles/
-│       └── index.ts                    # Assign/revoke roles
-├── constants.ts                        # Shared constants for frontend
-├── docs/                               # Documentation
-│   ├── CONSTANTS_REVISION_SUMMARY.md
-│   └── SYSTEM_CONFIG.md
-├── DEPLOYMENT_GUIDE.md                 # Deployment instructions
-└── README.md                           # This file
-```
-
-## 🗄️ Database Migrations
-
-### Core Tables
-
-1. **users** - User profiles (linked to auth.users)
-2. **roles** - Role definitions (hierarchical)
-3. **permissions** - Permission definitions (resource:action format)
-4. **user_roles** - Junction table: users ↔ roles (many-to-many)
-5. **role_permissions** - Junction table: roles ↔ permissions (many-to-many)
-6. **audit_log** - Audit trail of all important actions
-7. **translations** - i18n translations (en, th)
-
-### Default Data
-
-**Roles** (3):
-- `SUPERADMIN` (level 100) - Full system access
-- `ADMIN` (level 50) - Administrative access
-- `USER` (level 10) - Basic access
-
-**Permissions** (14):
-- Users: view, create, edit, delete, manage_roles
-- Roles: view, create, edit, delete
-- Permissions: view, assign
-- System: configure, audit
-
-**Locales** (2):
-- English (en)
-- Thai (th)
-
-### Security
-
-All tables have:
-- ✅ Row Level Security (RLS) enabled
-- ✅ Proper indexes for performance
-- ✅ Foreign key constraints with CASCADE
-- ✅ Updated_at triggers (where applicable)
-
-## ⚡ Edge Functions
-
-### Overview
-
-Edge Functions run on Deno runtime and use the service_role key to bypass RLS for administrative operations.
-
-**Total: 4 Edge Functions**
-
-### Functions
-
-#### 1. get-user-permissions
-**Purpose**: Calculate all permissions for a user based on their roles
-
-**Input**:
-```json
-{
-  "user_id": "uuid"
-}
-```
-
-**Output**:
-```json
-{
-  "permissions": ["users:view", "users:create", ...]
-}
-```
-
-**Used by**: AuthContext on login, permission checks
+This folder contains all Supabase-related files for Core ERP.
 
 ---
 
-#### 2. create-user
-**Purpose**: Create new user (auth + profile + roles) atomically
+## 📁 Files
 
-**Input**:
-```json
-{
-  "email": "user@example.com",
-  "name": "John Doe",
-  "phone": "+66812345678",
-  "role_ids": ["uuid1", "uuid2"]
-}
-```
+### Database Setup:
 
-**Output**:
-```json
-{
-  "success": true,
-  "user": { ... },
-  "message": "User created successfully"
-}
-```
+- **`CORE_COMPLETE.sql`** ⭐ - **ONE-FILE complete setup** (recommended)
+  - Creates 8 tables
+  - Seeds roles, permissions, translations, system config
+  - ~610 lines
+  - Just copy & paste!
 
-**Features**:
-- Creates Supabase auth user
-- Creates user profile
-- Assigns roles
-- Logs to audit_log
-- Rolls back on any failure
+- **`RESET_DATABASE.sql`** 🔄 - Clean database for testing
+  - Drops all tables
+  - Use before fresh installation test
 
----
+- **`migrations/`** - Individual migration files (6 files)
+  - For version control history
+  - Can be used incrementally
+  - Or use CORE_COMPLETE.sql instead
 
-#### 3. update-user
-**Purpose**: Update user profile information
+### Deployment:
 
-**Input**:
-```json
-{
-  "user_id": "uuid",
-  "name": "John Doe Updated",
-  "phone": "+66887654321",
-  "is_active": true
-}
-```
+- **`DEPLOYMENT_GUIDE.md`** - Production deployment guide
+- **`docs/SYSTEM_CONFIG.md`** - System configuration guide
+- **`README.md`** - This file
 
-**Output**:
-```json
-{
-  "success": true,
-  "user": { ... },
-  "message": "User updated successfully"
-}
-```
+### Functions:
 
-**Features**:
-- Updates user table
-- Logs changes to audit_log
-- Tracks before/after state
+- **`functions/`** - Supabase Edge Functions (4 functions)
+  - From @composable-erp/core-entity package
+  - Deploy to Supabase for production
 
 ---
 
-#### 4. assign-roles
-**Purpose**: Assign or revoke roles for a user
+## 🚀 Quick Setup
 
-**Input**:
-```json
-{
-  "user_id": "uuid",
-  "role_ids": ["uuid1", "uuid2"]
-}
-```
-
-**Output**:
-```json
-{
-  "success": true,
-  "message": "Roles assigned successfully",
-  "role_count": 2
-}
-```
-
-**Features**:
-- Replaces all user roles (not additive)
-- Logs to audit_log
-- Supports empty array (remove all roles)
-
----
-
-## 🚀 Deployment
-
-See **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** for complete deployment instructions.
-
-### Quick Start
+### Method 1: ONE-FILE Setup (Recommended)
 
 ```bash
-# Deploy migrations (via Dashboard SQL Editor)
-# Copy each migration file content and run in order
-
-# Deploy Edge Functions
-supabase functions deploy get-user-permissions --project-ref gtktmxrshikgehfdopaa
-supabase functions deploy create-user --project-ref gtktmxrshikgehfdopaa
-supabase functions deploy update-user --project-ref gtktmxrshikgehfdopaa
-supabase functions deploy assign-roles --project-ref gtktmxrshikgehfdopaa
-supabase functions deploy update-user-locale --project-ref gtktmxrshikgehfdopaa
+# 1. Copy CORE_COMPLETE.sql content
+# 2. Paste in Supabase SQL Editor
+# 3. Click Run
+# ✅ Done! (5 seconds)
 ```
 
-## 🔐 Environment Variables
-
-Edge Functions automatically have access to:
-- `SUPABASE_URL` - Your project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (admin access)
-- `SUPABASE_ANON_KEY` - Anonymous key (public access)
-
-No manual configuration needed! These are injected by Supabase.
-
-## 📝 Development Notes
-
-### Adding New Migration
-
-1. Create file: `supabase/migrations/YYYYMMDDHHMMSS_description.sql`
-2. Write SQL with `IF NOT EXISTS` for idempotency
-3. Test locally or in dev environment
-4. Deploy via Dashboard SQL Editor or CLI
-5. Update this README if schema changes
-
-### Adding New Edge Function
-
-1. Create folder: `supabase/functions/function-name/`
-2. Create `index.ts` with Deno.serve()
-3. Import CORS from `../_shared/cors.ts`
-4. Handle OPTIONS for CORS preflight
-5. Use service_role client for admin operations
-6. Deploy: `supabase functions deploy function-name --project-ref ...`
-7. Test via Dashboard or cURL
-8. Update this README with function details
-
-### Testing Locally
+### Method 2: Individual Migrations
 
 ```bash
-# Start local Supabase (requires Docker)
-supabase start
-
-# Serve functions locally
-supabase functions serve
-
-# Test function
-curl -X POST http://localhost:54321/functions/v1/function-name \
-  -H "Authorization: Bearer YOUR_LOCAL_ANON_KEY" \
-  -d '{"key": "value"}'
+# Run these in order in Supabase SQL Editor:
+1. 20250110000001_create_core_tables.sql
+2. 20250110000002_seed_roles_and_permissions.sql
+3. 20250110000003_add_user_locale.sql
+4. 20250110000004_create_translations_table.sql
+5. 20250110000005_seed_translations.sql
+6. 20250110000006_create_system_config.sql
 ```
 
-## 🔗 Related Documentation
+### Method 3: Via CLI
 
-- **[PROJECT_CONTEXT.md](../PROJECT_CONTEXT.md)** - Complete architecture guide
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment instructions
-- **[constants.ts](./constants.ts)** - Shared constants
-- **[../docs/](../docs/)** - Additional documentation
-
-## 📊 Current Project
-
-- **Project ID**: gtktmxrshikgehfdopaa
-- **URL**: https://gtktmxrshikgehfdopaa.supabase.co
-- **Dashboard**: https://app.supabase.com/project/gtktmxrshikgehfdopaa
-- **Region**: ap-southeast-1 (Thailand)
-- **Plan**: Pro ($10/month)
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Migrations fail**:
-- Check migration order (run sequentially)
-- Verify no syntax errors in SQL
-- Check if tables already exist
-
-**Edge Function errors**:
-- Check function logs in Dashboard
-- Verify CORS headers
-- Ensure Authorization header is sent
-- Check service_role key access
-
-**RLS blocking access**:
-- Remember: RLS applies to anon/authenticated roles
-- Edge Functions use service_role (bypasses RLS)
-- Client requests need proper auth token
-
-## 📚 Resources
-
-- **Supabase Docs**: https://supabase.com/docs
-- **Edge Functions**: https://supabase.com/docs/guides/functions
-- **Database**: https://supabase.com/docs/guides/database
-- **CLI**: https://supabase.com/docs/reference/cli
+```bash
+supabase login
+supabase link --project-ref your-project-ref
+supabase db push --yes
+```
 
 ---
 
-**Last Updated**: 2025-01-10  
-**Core ERP Version**: 1.0.0
+## 📊 What Gets Created
 
+### Tables (8):
+1. **users** - User profiles
+2. **roles** - Role definitions
+3. **permissions** - Permission definitions  
+4. **user_roles** - User-role assignments (many-to-many)
+5. **role_permissions** - Role-permission assignments (many-to-many)
+6. **audit_log** - Audit trail
+7. **system_config** - System-wide configuration
+8. **translations** - i18n translations
+
+### Default Data:
+- **3 roles**: Superadmin, Admin, User
+- **13 permissions**: users:*, roles:*, permissions:*, system:*
+- **8 system configs**: Auth settings
+- **60+ translations**: EN + TH
+
+### Security:
+- Row Level Security (RLS) on all tables
+- Permission-based policies
+- Service role for admin operations
+
+---
+
+## 🔧 Supabase Project Info
+
+**Current Project**:
+- ID: gtktmxrshikgehfdopaa
+- URL: https://gtktmxrshikgehfdopaa.supabase.co
+- Region: ap-southeast-1 (Thailand)
+- Port: 5175 (dev)
+
+---
+
+## 📚 Documentation
+
+- **Setup**: See `../QUICK_START.md`
+- **Architecture**: See `../PROJECT_CONTEXT.md`
+- **Deployment**: See `DEPLOYMENT_GUIDE.md`
+- **System Config**: See `docs/SYSTEM_CONFIG.md`
+
+---
+
+## 🧪 Testing
+
+Use `RESET_DATABASE.sql` to clean database for fresh testing.
+
+See `../docs/testing/TESTING_FRESH_INSTALL.md` for complete test procedure.
+
+---
+
+**All Supabase files are production-ready!** ✅

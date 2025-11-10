@@ -5,7 +5,7 @@
 -- Copy and paste this ENTIRE file into Supabase SQL Editor to set up Core ERP
 -- 
 -- What this script does:
--- 1. Creates 7 core tables (users, roles, permissions, user_roles, role_permissions, audit_log, translations)
+-- 1. Creates 8 core tables (users, roles, permissions, user_roles, role_permissions, audit_log, system_config, translations)
 -- 2. Sets up Row Level Security (RLS) policies
 -- 3. Creates indexes for performance
 -- 4. Adds functions and triggers
@@ -124,7 +124,25 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at DESC
 CREATE INDEX IF NOT EXISTS idx_audit_log_resource ON audit_log(resource_type, resource_id);
 
 -- =====================================================
--- 7. TRANSLATIONS TABLE (for i18n)
+-- 7. SYSTEM_CONFIG TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS system_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key VARCHAR(100) UNIQUE NOT NULL,
+  value JSONB NOT NULL,
+  description TEXT,
+  category VARCHAR(50),
+  is_system BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_system_config_key ON system_config(key);
+CREATE INDEX IF NOT EXISTS idx_system_config_category ON system_config(category);
+
+COMMENT ON TABLE system_config IS 'Stores system-wide configuration settings';
+
+-- 8. TRANSLATIONS TABLE (for i18n)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS translations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -169,6 +187,11 @@ CREATE TRIGGER update_roles_updated_at
 
 CREATE TRIGGER set_translations_updated_at
   BEFORE UPDATE ON translations
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_system_config_updated_at
+  BEFORE UPDATE ON system_config
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
@@ -262,6 +285,27 @@ CREATE POLICY "Service role can insert audit logs"
   ON audit_log FOR INSERT
   TO service_role
   WITH CHECK (true);
+
+-- System_config table RLS
+ALTER TABLE system_config ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "System config viewable by authenticated users"
+  ON system_config FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Only admins can modify system config"
+  ON system_config FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM user_roles ur
+      JOIN role_permissions rp ON ur.role_id = rp.role_id
+      JOIN permissions p ON rp.permission_id = p.id
+      WHERE ur.user_id = (SELECT id FROM users WHERE auth_user_id = auth.uid())
+      AND p.code = 'system:configure'
+    )
+  );
 
 -- Translations table RLS
 ALTER TABLE translations ENABLE ROW LEVEL SECURITY;
@@ -513,6 +557,22 @@ ON CONFLICT (locale, namespace, key) DO UPDATE SET value = EXCLUDED.value;
 -- SETUP COMPLETE
 -- ============================================================================
 
+-- Seed default system config
+INSERT INTO system_config (key, value, description, category, is_system) VALUES
+  ('SESSION_WARNING_THRESHOLDS', '[300000, 60000]', 'Session warning thresholds in ms', 'auth', true),
+  ('ACTIVITY_DEBOUNCE_MS', '30000', 'Activity tracking debounce in ms', 'auth', true),
+  ('SESSION_CHECK_INTERVAL_MS', '60000', 'Session check interval in ms', 'auth', true),
+  ('MAX_AUTH_RETRIES', '3', 'Maximum authentication retry attempts', 'auth', true),
+  ('AUTH_RETRY_BASE_DELAY_MS', '1000', 'Base delay for auth retries in ms', 'auth', true),
+  ('AUTH_SYNC_CHANNEL', '"auth-sync"', 'Channel for auth synchronization', 'auth', true),
+  ('RETURN_URL_KEY', '"auth_return_url"', 'Storage key for return URL', 'auth', true),
+  ('ACTIVITY_EVENTS', '["mousemove","keydown","click","scroll","touchstart"]', 'Events to track for activity', 'auth', true)
+ON CONFLICT (key) DO NOTHING;
+
+-- ============================================================================
+-- SETUP COMPLETE
+-- ============================================================================
+
 DO $$
 DECLARE
   table_count INTEGER;
@@ -520,13 +580,15 @@ DECLARE
   permission_count INTEGER;
   assignment_count INTEGER;
   translation_count INTEGER;
+  config_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO table_count FROM information_schema.tables 
-    WHERE table_schema = 'public' AND table_name IN ('users', 'roles', 'permissions', 'user_roles', 'role_permissions', 'audit_log', 'translations');
+    WHERE table_schema = 'public' AND table_name IN ('users', 'roles', 'permissions', 'user_roles', 'role_permissions', 'audit_log', 'system_config', 'translations');
   SELECT COUNT(*) INTO role_count FROM roles;
   SELECT COUNT(*) INTO permission_count FROM permissions;
   SELECT COUNT(*) INTO assignment_count FROM role_permissions;
   SELECT COUNT(*) INTO translation_count FROM translations;
+  SELECT COUNT(*) INTO config_count FROM system_config;
   
   RAISE NOTICE '========================================';
   RAISE NOTICE 'Core ERP Database Setup Complete!';
@@ -536,6 +598,7 @@ BEGIN
   RAISE NOTICE 'Permissions: %', permission_count;
   RAISE NOTICE 'Role assignments: %', assignment_count;
   RAISE NOTICE 'Translations: %', translation_count;
+  RAISE NOTICE 'System config: %', config_count;
   RAISE NOTICE '========================================';
   RAISE NOTICE 'Next steps:';
   RAISE NOTICE '1. Create your first user in Supabase Auth';
