@@ -101,7 +101,7 @@ function SettingsPage() {
 For Edge Functions or non-React code:
 
 ```typescript
-import { getSystemConfig, getConfigValue } from '../supabase/constants'
+import { getSystemConfig, getConfigValue } from '@/lib/systemConfig'
 
 // Get all config at once (recommended at app startup)
 const config = await getSystemConfig()
@@ -114,7 +114,7 @@ const maxRetries = await getConfigValue('MAX_AUTH_RETRIES')
 ### Synchronous Access (After Initial Load)
 
 ```typescript
-import { getSystemConfigSync, SESSION_CHECK_INTERVAL_MS } from '../supabase/constants'
+import { getSystemConfigSync, SESSION_CHECK_INTERVAL_MS } from '@/lib/systemConfig'
 
 // After config has been loaded once, use sync access
 const config = getSystemConfigSync()
@@ -127,7 +127,7 @@ The config is automatically pre-loaded when the module is imported, but you can 
 
 ```typescript
 // In main.tsx or App.tsx
-import { getSystemConfig } from '../supabase/constants'
+import { getSystemConfig } from '@/lib/systemConfig'
 
 async function initApp() {
   await getSystemConfig() // Pre-load config
@@ -138,7 +138,7 @@ async function initApp() {
 ### Clearing Cache (After Config Updates)
 
 ```typescript
-import { clearConfigCache } from '../supabase/constants'
+import { clearConfigCache } from '@/lib/systemConfig'
 
 // After updating config in the database
 await updateSystemConfig('MAX_AUTH_RETRIES', 5)
@@ -188,7 +188,7 @@ VALUES (
 );
 ```
 
-**Note**: After adding new constants, you must update the `SystemConfig` interface in `supabase/constants.ts`.
+**Note**: After adding new constants, you must update the `SystemConfig` interface in `src/lib/systemConfig.ts`.
 
 ## Security
 
@@ -244,7 +244,7 @@ function MyComponent() {
 
 **In Non-React Code:**
 ```typescript
-import { getConfigValue } from '../supabase/constants'
+import { getConfigValue } from '@/lib/systemConfig'
 
 async function myFunction() {
   const maxRetries = await getConfigValue('MAX_AUTH_RETRIES')
@@ -254,7 +254,7 @@ async function myFunction() {
 
 **For Synchronous Access (after initial load):**
 ```typescript
-import { MAX_AUTH_RETRIES } from '../supabase/constants'
+import { MAX_AUTH_RETRIES } from '@/lib/systemConfig'
 
 // Function call (returns cached value)
 const retries = MAX_AUTH_RETRIES() // 3

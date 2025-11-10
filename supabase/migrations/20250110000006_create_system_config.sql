@@ -49,14 +49,14 @@ CREATE TRIGGER update_system_config_updated_at
 
 -- Seed default system configuration
 INSERT INTO system_config (key, value, description, category, is_system) VALUES
-  ('SESSION_WARNING_THRESHOLDS', '[300000, 60000]', 'Session warning thresholds in ms', 'auth', true),
-  ('ACTIVITY_DEBOUNCE_MS', '30000', 'Activity tracking debounce in ms', 'auth', true),
-  ('SESSION_CHECK_INTERVAL_MS', '60000', 'Session check interval in ms', 'auth', true),
-  ('MAX_AUTH_RETRIES', '3', 'Maximum authentication retry attempts', 'auth', true),
-  ('AUTH_RETRY_BASE_DELAY_MS', '1000', 'Base delay for auth retries in ms', 'auth', true),
-  ('AUTH_SYNC_CHANNEL', '"auth-sync"', 'Channel for auth synchronization', 'auth', true),
-  ('RETURN_URL_KEY', '"auth_return_url"', 'Storage key for return URL', 'auth', true),
-  ('ACTIVITY_EVENTS', '["mousemove","keydown","click","scroll","touchstart"]', 'Events to track for activity', 'auth', true)
+  ('SESSION_WARNING_THRESHOLDS', '[300000, 60000]'::jsonb, 'Session warning thresholds in ms', 'auth', true),
+  ('ACTIVITY_DEBOUNCE_MS', '30000'::jsonb, 'Activity tracking debounce in ms', 'auth', true),
+  ('SESSION_CHECK_INTERVAL_MS', '60000'::jsonb, 'Session check interval in ms', 'auth', true),
+  ('MAX_AUTH_RETRIES', '3'::jsonb, 'Maximum authentication retry attempts', 'auth', true),
+  ('AUTH_RETRY_BASE_DELAY_MS', '1000'::jsonb, 'Base delay for auth retries in ms', 'auth', true),
+  ('AUTH_SYNC_CHANNEL', '"auth-sync"'::jsonb, 'Channel for auth synchronization', 'auth', true),
+  ('RETURN_URL_KEY', '"auth_return_url"'::jsonb, 'Storage key for return URL', 'auth', true),
+  ('ACTIVITY_EVENTS', '["mousemove","keydown","click","scroll","touchstart"]'::jsonb, 'Events to track for activity', 'auth', true)
 ON CONFLICT (key) DO NOTHING;
 
 -- Add comment

@@ -79,28 +79,41 @@ Location: `/docs/`
 
 ## 🔄 Update Protocol
 
+### ⚠️ Important: Update Existing Documents, Don't Create New Ones
+
+**Key Principle:** Check existing documentation first and update what's needed. Only create new documents when:
+- A new feature category requires a new guide
+- A new type of log is needed (e.g., first deployment log)
+- Documentation structure needs expansion
+
+**For most work:**
+- ✅ **Update** existing documents (PROJECT_CONTEXT.md, IMPLEMENTATION_STATUS.md, etc.)
+- ✅ **Check** if relevant docs exist before creating new ones
+- ❌ **Don't** create new result/summary documents for every session
+- ❌ **Don't** duplicate information in multiple files
+
 ### When to Update Documentation
 
 #### After Major Features
 1. Update `PROJECT_CONTEXT.md` with new architecture details
-2. Create entry in `logs/IMPLEMENTATION_STATUS.md`
-3. Add relevant guide to `/docs/guides/`
+2. Update entry in `logs/IMPLEMENTATION_STATUS.md` (don't create new file)
+3. Update or add relevant guide in `/docs/guides/` if needed
 4. Update API documentation if endpoints changed
 
 #### After Testing
-1. Create or update `logs/YYYYMMDD_test_results.md`
-2. Update `TEST_RESULTS.md` summary
+1. Update `logs/TEST_RESULTS.md` with new test results (append to existing file)
+2. Only create `logs/YYYYMMDD_test_results.md` if it's a major test suite run
 3. Document any bugs found in issues tracker
 
 #### After Deployment
-1. Update `logs/CHANGELOG.md` with version
-2. Create deployment log in `/logs/`
+1. Update `logs/CHANGELOG.md` with version (append to existing file)
+2. Only create new deployment log if it's a major release milestone
 3. Update production documentation
 
 #### Daily/Session End
-1. Create session summary in `/logs/`
-2. Update `IMPLEMENTATION_STATUS.md`
-3. Note any blockers or next steps
+1. **Update** `logs/IMPLEMENTATION_STATUS.md` (don't create new session log unless it's a major milestone)
+2. **Update** `PROJECT_CONTEXT.md` if architecture changed
+3. Note any blockers or next steps in existing status documents
 
 ---
 
@@ -170,15 +183,16 @@ When starting a new session:
    - `.cursorrules` - Follow project-specific rules
 
 2. **Update During Session:**
-   - Create session log in `/logs/YYYYMMDD_session_description.md`
-   - Update status documents as features complete
-   - Note any architectural decisions made
+   - **Update** existing status documents as features complete
+   - **Update** `IMPLEMENTATION_STATUS.md` with progress
+   - Note any architectural decisions in existing docs
+   - Only create new session log if it's a major milestone or new feature category
 
 3. **Before Ending Session:**
-   - Update `IMPLEMENTATION_STATUS.md`
-   - Create `COMPLETION_SUMMARY.md` in `/logs/`
-   - List next steps clearly
-   - Update `PROJECT_CONTEXT.md` if architecture changed
+   - **Update** `IMPLEMENTATION_STATUS.md` (don't create new completion summary)
+   - **Update** `PROJECT_CONTEXT.md` if architecture changed
+   - List next steps in existing status documents
+   - Only create new documents if truly needed (new feature category, major milestone)
 
 ### For Developers
 
@@ -190,12 +204,13 @@ When returning to project:
    - Review `PROJECT_CONTEXT.md` if needed
 
 2. **Before Starting Work:**
-   - Create new session log
-   - Note your goals for this session
+   - **Update** `IMPLEMENTATION_STATUS.md` with your goals
+   - Only create new session log if it's a major milestone
 
 3. **During Work:**
-   - Update relevant documentation as you go
-   - Document decisions in session log
+   - **Update** relevant documentation as you go
+   - **Update** existing status documents with decisions
+   - Don't create new documents unless necessary
 
 ---
 
@@ -326,11 +341,11 @@ Brief description of what was tested
 # View latest logs
 ls -la logs/ | sort -r | head
 
-# Create new session log
-touch logs/$(date +%Y%m%d)_session_name.md
-
-# View current status
+# View current status (update this file, don't create new ones)
 cat logs/IMPLEMENTATION_STATUS.md
+
+# Only create new session log for major milestones
+# touch logs/$(date +%Y%m%d)_session_name.md
 ```
 
 ---
@@ -339,26 +354,26 @@ cat logs/IMPLEMENTATION_STATUS.md
 
 ### When Creating New Feature
 
-- [ ] Update `PROJECT_CONTEXT.md` with architecture details
-- [ ] Create guide in `/docs/guides/` if user-facing
-- [ ] Update API docs in `/docs/api/` if endpoints changed
-- [ ] Add tests to `/docs/testing/`
-- [ ] Update `IMPLEMENTATION_STATUS.md`
-- [ ] Create session log in `/logs/`
+- [ ] **Update** `PROJECT_CONTEXT.md` with architecture details
+- [ ] **Check** if guide exists in `/docs/guides/` - update it, or create only if new category
+- [ ] **Update** API docs in `/docs/api/` if endpoints changed
+- [ ] **Update** tests in `/docs/testing/`
+- [ ] **Update** `IMPLEMENTATION_STATUS.md` (don't create new log)
+- [ ] Only create new session log if it's a major milestone
 
 ### When Fixing Bugs
 
-- [ ] Document bug in test results
-- [ ] Update troubleshooting guide
-- [ ] Note fix in session log
-- [ ] Update relevant documentation
+- [ ] **Update** `logs/TEST_RESULTS.md` with bug details
+- [ ] **Update** troubleshooting guide
+- [ ] **Update** `IMPLEMENTATION_STATUS.md` with fix
+- [ ] **Update** relevant documentation
 
 ### When Refactoring
 
-- [ ] Update architecture docs
-- [ ] Update code examples
-- [ ] Update API docs if signatures changed
-- [ ] Note reasoning in session log
+- [ ] **Update** architecture docs
+- [ ] **Update** code examples
+- [ ] **Update** API docs if signatures changed
+- [ ] **Update** `PROJECT_CONTEXT.md` with reasoning
 
 ---
 
@@ -377,10 +392,11 @@ cat logs/IMPLEMENTATION_STATUS.md
 - ❌ Don't duplicate information across multiple docs
 - ❌ Don't let documentation get stale
 - ❌ Don't use ambiguous status indicators
-- ❌ Don't skip session logs
+- ❌ Don't create new result/summary documents for every session
 - ❌ Don't forget to date your updates
 - ❌ Don't write documentation for yourself only
 - ❌ Don't make assumptions about reader's knowledge
+- ❌ Don't create new documents when updating existing ones will suffice
 
 ---
 
@@ -433,7 +449,7 @@ documentation
 
 ---
 
-**Last Updated:** 2025-01-10  
+**Last Updated:** 2025-01-11  
 **Maintained By:** Project Team  
 **Review Frequency:** Monthly
 

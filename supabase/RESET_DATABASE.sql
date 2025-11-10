@@ -1,63 +1,113 @@
 -- ============================================================================
--- DATABASE RESET SCRIPT
+-- DATABASE RESET SCRIPT - DROP EVERYTHING
 -- ============================================================================
--- This script removes ALL Core ERP and plugin tables
--- Use this to test fresh installation or reset to clean state
+-- This script removes ALL tables, functions, triggers, sequences in public schema
+-- Use this to test fresh installation or reset to completely clean state
 --
--- ⚠️ WARNING: This will DELETE ALL DATA!
+-- ⚠️ WARNING: This will DELETE ALL DATA in the public schema!
+-- ⚠️ This drops EVERYTHING - not just Core ERP tables!
 -- ⚠️ Make sure you have a backup if needed!
 --
 -- Usage:
 -- 1. Copy this entire file
 -- 2. Paste into Supabase SQL Editor
 -- 3. Click Run
--- 4. Database will be empty and ready for fresh setup
+-- 4. Database will be completely empty and ready for fresh setup
 -- ============================================================================
 
--- Drop all triggers first (to avoid dependency issues)
-DROP TRIGGER IF EXISTS generate_leave_request_number_trigger ON leave_requests;
-DROP TRIGGER IF EXISTS log_leave_request_audit ON leave_requests;
-DROP TRIGGER IF EXISTS update_leave_types_updated_at ON leave_types;
-DROP TRIGGER IF EXISTS update_leave_balances_updated_at ON leave_balances;
-DROP TRIGGER IF EXISTS update_leave_requests_updated_at ON leave_requests;
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-DROP TRIGGER IF EXISTS update_roles_updated_at ON roles;
-DROP TRIGGER IF EXISTS set_translations_updated_at ON translations;
-
--- Drop all functions
-DROP FUNCTION IF EXISTS generate_leave_request_number() CASCADE;
-DROP FUNCTION IF EXISTS log_leave_request_change() CASCADE;
-DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
-DROP FUNCTION IF EXISTS update_translations_updated_at() CASCADE;
-
--- Drop all sequences
-DROP SEQUENCE IF EXISTS leave_request_seq CASCADE;
-
 -- ============================================================================
--- Drop Plugin Tables (in dependency order)
+-- STEP 1: Drop ALL triggers first (to avoid dependency issues)
 -- ============================================================================
 
--- Leave Management Plugin
-DROP TABLE IF EXISTS leave_calendar_cache CASCADE;
-DROP TABLE IF EXISTS leave_requests CASCADE;
-DROP TABLE IF EXISTS leave_balances CASCADE;
-DROP TABLE IF EXISTS leave_types CASCADE;
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT trigger_name, event_object_table, event_object_schema
+        FROM information_schema.triggers
+        WHERE event_object_schema = 'public'
+    ) LOOP
+        EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I.%I CASCADE', 
+            r.trigger_name, r.event_object_schema, r.event_object_table);
+    END LOOP;
+END $$;
 
 -- ============================================================================
--- Drop Core Tables (in dependency order)
+-- STEP 2: Drop ALL tables in public schema (CASCADE handles dependencies)
 -- ============================================================================
 
--- Drop junction tables first
-DROP TABLE IF EXISTS role_permissions CASCADE;
-DROP TABLE IF EXISTS user_roles CASCADE;
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    ) LOOP
+        EXECUTE format('DROP TABLE IF EXISTS %I CASCADE', r.tablename);
+    END LOOP;
+END $$;
 
--- Drop main tables
-DROP TABLE IF EXISTS audit_log CASCADE;
-DROP TABLE IF EXISTS translations CASCADE;
-DROP TABLE IF EXISTS system_config CASCADE;
-DROP TABLE IF EXISTS permissions CASCADE;
-DROP TABLE IF EXISTS roles CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- ============================================================================
+-- STEP 3: Drop ALL functions in public schema
+-- ============================================================================
+
+DO $$
+DECLARE
+    r RECORD;
+    func_signature TEXT;
+BEGIN
+    FOR r IN (
+        SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+        FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = 'public'
+    ) LOOP
+        IF r.args IS NULL OR r.args = '' THEN
+            func_signature := format('%I()', r.proname);
+        ELSE
+            func_signature := format('%I(%s)', r.proname, r.args);
+        END IF;
+        EXECUTE format('DROP FUNCTION IF EXISTS %s CASCADE', func_signature);
+    END LOOP;
+END $$;
+
+-- ============================================================================
+-- STEP 4: Drop ALL sequences in public schema
+-- ============================================================================
+
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT sequence_name
+        FROM information_schema.sequences
+        WHERE sequence_schema = 'public'
+    ) LOOP
+        EXECUTE format('DROP SEQUENCE IF EXISTS %I CASCADE', r.sequence_name);
+    END LOOP;
+END $$;
+
+-- ============================================================================
+-- STEP 5: Drop ALL types in public schema (if any custom types exist)
+-- ============================================================================
+
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT typname
+        FROM pg_type
+        WHERE typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
+        AND typtype = 'c'  -- composite types
+    ) LOOP
+        EXECUTE format('DROP TYPE IF EXISTS %I CASCADE', r.typname);
+    END LOOP;
+END $$;
 
 -- ============================================================================
 -- CLEANUP COMPLETE

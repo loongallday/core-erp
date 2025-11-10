@@ -6,7 +6,7 @@ import {
   getConfigValue,
   clearConfigCache,
   SystemConfig,
-} from '../../supabase/constants'
+} from '@/lib/systemConfig'
 
 /**
  * Fetch system configuration with React Query

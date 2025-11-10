@@ -5,8 +5,8 @@
  * Constants are fetched from the system_config table and cached for performance.
  */
 
-import { supabase } from '../src/lib/supabase'
-import { logWarn, logError, logDebug } from '../src/lib/logger'
+import { supabase } from './supabase'
+import { logWarn, logError, logDebug } from './logger'
 
 // Type definitions for system config
 export interface SystemConfig {
@@ -173,3 +173,4 @@ getSystemConfig().catch((err) => {
  * - useSystemConfigAdmin() - Get all config with metadata (for admin UI)
  * - useBulkUpdateSystemConfig() - Update multiple config values
  */
+
